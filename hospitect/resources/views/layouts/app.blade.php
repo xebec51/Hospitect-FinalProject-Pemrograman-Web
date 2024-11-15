@@ -23,10 +23,11 @@
                     @elseif(Auth::user()->role === 'dokter')
                         <li><a href="{{ route('dokter.dashboard') }}" class="hover:text-gray-300">Dashboard Dokter</a></li>
                         <li><a href="{{ route('dokter.medical-records.index') }}" class="hover:text-gray-300">Rekam Medis</a></li>
-                        <li><a href="{{ route('dokter.jadwal-konsultasi.index') }}" class="hover:text-gray-300">Jadwal Konsultasi</a></li> <!-- Menu baru untuk dokter -->
+                        <li><a href="{{ route('dokter.jadwal-konsultasi.index') }}" class="hover:text-gray-300">Jadwal Konsultasi</a></li>
                     @elseif(Auth::user()->role === 'pasien')
                         <li><a href="{{ route('pasien.dashboard') }}" class="hover:text-gray-300">Dashboard Pasien</a></li>
                         <li><a href="{{ route('pasien.records') }}" class="hover:text-gray-300">Rekam Medis Saya</a></li>
+                        <li><a href="{{ route('pasien.profile') }}" class="hover:text-gray-300">Profil</a></li> <!-- Menu baru untuk profil pasien -->
                     @endif
                     <li>
                         <form method="POST" action="{{ route('logout') }}">

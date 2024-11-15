@@ -11,6 +11,7 @@ use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\ConsultationScheduleController;
 
+// Halaman utama yang mengarahkan berdasarkan status login
 Route::get('/', function () {
     if (Auth::check()) {
         return redirect()->route('dashboard');
@@ -18,6 +19,7 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
+// Rute dashboard yang mengarahkan berdasarkan peran pengguna
 Route::get('/dashboard', function () {
     if (Auth::check()) {
         $role = Auth::user()->role;
@@ -31,8 +33,10 @@ Route::get('/dashboard', function () {
     return redirect('/login');
 })->name('dashboard');
 
+// Rute otentikasi
 require __DIR__.'/auth.php';
 
+// Rute untuk admin
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::resource('/admin/users', UserController::class)->names([
@@ -55,6 +59,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     ]);
 });
 
+// Rute untuk dokter
 Route::middleware(['auth', 'role:dokter'])->group(function () {
     Route::get('/dokter/dashboard', [DokterController::class, 'index'])->name('dokter.dashboard');
     Route::resource('/dokter/medical-records', MedicalRecordController::class)->names([
@@ -67,16 +72,11 @@ Route::middleware(['auth', 'role:dokter'])->group(function () {
         'destroy' => 'dokter.medical-records.destroy',
     ]);
     Route::get('/dokter/schedule', [ConsultationScheduleController::class, 'index'])->name('dokter.schedule');
-});
 
-Route::middleware(['auth', 'role:pasien'])->group(function () {
-    Route::get('/pasien/dashboard', [PasienController::class, 'index'])->name('pasien.dashboard');
-    Route::get('/pasien/medical-records', [PasienController::class, 'showRecords'])->name('pasien.records');
-    Route::get('/pasien/schedule', [PasienController::class, 'schedule'])->name('pasien.schedule');
-    Route::post('/pasien/feedback', [PasienController::class, 'storeFeedback'])->name('pasien.feedback');
+    // Rute profil untuk dokter
+    Route::get('/dokter/profile', [DokterController::class, 'showProfile'])->name('dokter.profile');
+    Route::post('/dokter/profile/update', [DokterController::class, 'updateProfile'])->name('dokter.profile.update');
 });
-
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
 // Rute khusus jadwal konsultasi dokter
 Route::middleware(['auth', 'role:dokter'])->group(function () {
@@ -87,3 +87,19 @@ Route::middleware(['auth', 'role:dokter'])->group(function () {
     Route::delete('/dokter/jadwal-konsultasi/{id}', [ConsultationScheduleController::class, 'destroy'])->name('dokter.jadwal-konsultasi.destroy');
     Route::get('/dokter/jadwal-konsultasi/create', [ConsultationScheduleController::class, 'create'])->name('dokter.jadwal-konsultasi.create');
 });
+
+// Rute untuk pasien
+Route::middleware(['auth', 'role:pasien'])->group(function () {
+    Route::get('/pasien/dashboard', [PasienController::class, 'index'])->name('pasien.dashboard');
+    Route::get('/pasien/medical-records', [PasienController::class, 'showRecords'])->name('pasien.records');
+    Route::get('/pasien/schedule', [PasienController::class, 'schedule'])->name('pasien.schedule');
+    Route::post('/pasien/feedback', [PasienController::class, 'storeFeedback'])->name('pasien.feedback');
+
+    // Rute profil untuk pasien
+    Route::get('/pasien/profile', [PasienController::class, 'showProfile'])->name('pasien.profile');
+    Route::post('/pasien/profile/update', [PasienController::class, 'updateProfile'])->name('pasien.profile.update');
+    Route::post('/pasien/profile/update-medical', [PasienController::class, 'updateMedicalProfile'])->name('pasien.profile.updateMedical'); // Tambahan
+});
+
+// Rute logout
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');

@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             MedicineSeeder::class,
             MedicalRecordSeeder::class,
             JadwalKonsultasiSeeder::class,
+            PatientDetailSeeder::class,
             // Tambahkan seeder lainnya di sini jika diperlukan
         ]);
     }
