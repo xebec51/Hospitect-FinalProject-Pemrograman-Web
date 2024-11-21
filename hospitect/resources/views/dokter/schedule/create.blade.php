@@ -1,4 +1,3 @@
-<!-- resources/views/dokter/schedule/create.blade.php -->
 @extends('layouts.app')
 
 @section('title', 'Tambah Jadwal Konsultasi')
@@ -20,42 +19,38 @@
     <form action="{{ route('dokter.jadwal-konsultasi.store') }}" method="POST">
         @csrf
         <div class="mb-4">
-            <label for="id_dokter" class="block text-gray-700">Dokter:</label>
-            <select name="id_dokter" id="id_dokter" class="w-full border-gray-300 rounded p-2" required>
+            <label for="doctor_id" class="block text-gray-700">Dokter:</label>
+            <select name="doctor_id" id="doctor_id" class="w-full border-gray-300 rounded p-2" required>
                 <option value="">Pilih Dokter</option>
                 @foreach($dokters as $dokter)
-                    <option value="{{ $dokter->id }}">{{ $dokter->name }}</option>
+                    <option value="{{ $dokter->id }}">{{ $dokter->user->name }}</option>
                 @endforeach
             </select>
         </div>
 
         <div class="mb-4">
-            <label for="id_pasien" class="block text-gray-700">Pasien:</label>
-            <select name="id_pasien" id="id_pasien" class="w-full border-gray-300 rounded p-2" required>
+            <label for="patient_id" class="block text-gray-700">Pasien:</label>
+            <select name="patient_id" id="patient_id" class="w-full border-gray-300 rounded p-2" required>
                 <option value="">Pilih Pasien</option>
                 @foreach($pasiens as $pasien)
-                    <option value="{{ $pasien->id }}">{{ $pasien->name }}</option>
+                    <option value="{{ $pasien->id }}">{{ $pasien->user->name }}</option>
                 @endforeach
             </select>
         </div>
 
         <div class="mb-4">
-            <label for="tanggal" class="block text-gray-700">Tanggal Konsultasi:</label>
-            <input type="date" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" class="w-full border-gray-300 rounded p-2" required>
+            <label for="date" class="block text-gray-700">Tanggal:</label>
+            <input type="date" name="date" id="date" value="{{ old('date') }}" class="w-full border-gray-300 rounded p-2" required>
         </div>
 
         <div class="mb-4">
-            <label for="status" class="block text-gray-700">Status:</label>
-            <select name="status" id="status" class="w-full border-gray-300 rounded p-2">
-                <option value="Pending" {{ old('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                <option value="Confirmed" {{ old('status') == 'Confirmed' ? 'selected' : '' }}>Confirmed</option>
-                <option value="Completed" {{ old('status') == 'Completed' ? 'selected' : '' }}>Completed</option>
-            </select>
+            <label for="time" class="block text-gray-700">Waktu:</label>
+            <input type="time" name="time" id="time" value="{{ old('time') }}" class="w-full border-gray-300 rounded p-2" required>
         </div>
 
         <div class="mb-4">
-            <label for="catatan" class="block text-gray-700">Catatan:</label>
-            <textarea name="catatan" id="catatan" rows="4" class="w-full border-gray-300 rounded p-2">{{ old('catatan') }}</textarea>
+            <label for="notes" class="block text-gray-700">Catatan:</label>
+            <textarea name="notes" id="notes" rows="4" class="w-full border-gray-300 rounded p-2">{{ old('notes') }}</textarea>
         </div>
 
         <div class="flex justify-end">

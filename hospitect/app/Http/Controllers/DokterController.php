@@ -16,8 +16,8 @@ class DokterController extends Controller
     public function index()
     {
         $doctorId = Auth::id();
-        $recentMedicalRecords = MedicalRecord::where('id_dokter', $doctorId)
-            ->with('pasien')
+        $recentMedicalRecords = MedicalRecord::where('doctor_id', $doctorId)
+            ->with(['patient.user', 'medicines']) // Tambahkan relasi medicines
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
@@ -32,7 +32,7 @@ class DokterController extends Controller
      */
     public function schedule()
     {
-        $appointments = Auth::user()->dokter->appointments;
+        $appointments = Auth::user()->appointmentsAsDoctor;
 
         return view('dokter.schedule', compact('appointments'));
     }

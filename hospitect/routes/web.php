@@ -10,96 +10,67 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\ConsultationScheduleController;
+use App\Http\Controllers\PatientDetailController;
+use App\Http\Controllers\DoctorProfileController;
+use App\Http\Controllers\FeedbackController;
 
-// Halaman utama yang mengarahkan berdasarkan status login
+// Halaman utama
 Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect()->route('dashboard');
-    }
-    return redirect('/login');
+    return Auth::check() ? redirect()->route('dashboard') : redirect('/login');
 });
 
-// Rute dashboard yang mengarahkan berdasarkan peran pengguna
+// Dashboard peran pengguna
 Route::get('/dashboard', function () {
     if (Auth::check()) {
         $role = Auth::user()->role;
         return match ($role) {
             'admin' => redirect()->route('admin.dashboard'),
             'dokter' => redirect()->route('dokter.dashboard'),
-            'pasien' => redirect()->route('pasien.dashboard'),
-            default => abort(403, 'Unauthorized')
+            'pasien' => redirect()->route('pasien.records'),
+            default => abort(403, 'Unauthorized'),
         };
     }
     return redirect('/login');
 })->name('dashboard');
 
-// Rute otentikasi
-require __DIR__.'/auth.php';
+// Autentikasi
+require __DIR__ . '/auth.php';
 
-// Rute untuk admin
+// Grup rute untuk Admin
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-    Route::resource('/admin/users', UserController::class)->names([
-        'index' => 'admin.users.index',
-        'create' => 'admin.users.create',
-        'store' => 'admin.users.store',
-        'show' => 'admin.users.show',
-        'edit' => 'admin.users.edit',
-        'update' => 'admin.users.update',
-        'destroy' => 'admin.users.destroy',
-    ]);
-    Route::resource('/admin/medicines', MedicineController::class)->names([
-        'index' => 'admin.medicines.index',
-        'create' => 'admin.medicines.create',
-        'store' => 'admin.medicines.store',
-        'show' => 'admin.medicines.show',
-        'edit' => 'admin.medicines.edit',
-        'update' => 'admin.medicines.update',
-        'destroy' => 'admin.medicines.destroy',
-    ]);
+    Route::resource('/admin/users', UserController::class)->names('admin.users');
+    Route::resource('/admin/medicines', MedicineController::class)->names('admin.medicines');
+    // Tambahkan rute profil admin jika diperlukan
 });
 
-// Rute untuk dokter
+// Grup rute untuk Dokter
 Route::middleware(['auth', 'role:dokter'])->group(function () {
     Route::get('/dokter/dashboard', [DokterController::class, 'index'])->name('dokter.dashboard');
-    Route::resource('/dokter/medical-records', MedicalRecordController::class)->names([
-        'index' => 'dokter.medical-records.index',
-        'create' => 'dokter.medical-records.create',
-        'store' => 'dokter.medical-records.store',
-        'show' => 'dokter.medical-records.show',
-        'edit' => 'dokter.medical-records.edit',
-        'update' => 'dokter.medical-records.update',
-        'destroy' => 'dokter.medical-records.destroy',
-    ]);
+    Route::resource('/dokter/medical-records', MedicalRecordController::class)->names('dokter.medical-records');
     Route::get('/dokter/schedule', [ConsultationScheduleController::class, 'index'])->name('dokter.schedule');
-
-    // Rute profil untuk dokter
-    Route::get('/dokter/profile', [DokterController::class, 'showProfile'])->name('dokter.profile');
-    Route::post('/dokter/profile/update', [DokterController::class, 'updateProfile'])->name('dokter.profile.update');
+    Route::get('/dokter/profile', [DoctorProfileController::class, 'edit'])->name('dokter.profile');
+    Route::post('/dokter/profile/update', [DoctorProfileController::class, 'update'])->name('dokter.profile.update');
+    Route::resource('/dokter/jadwal-konsultasi', ConsultationScheduleController::class)->names('dokter.jadwal-konsultasi');
+    Route::get('/dokter/feedback', [FeedbackController::class, 'indexForDoctor'])->name('dokter.feedback');
 });
 
-// Rute khusus jadwal konsultasi dokter
-Route::middleware(['auth', 'role:dokter'])->group(function () {
-    Route::get('/dokter/jadwal-konsultasi', [ConsultationScheduleController::class, 'index'])->name('dokter.jadwal-konsultasi.index');
-    Route::post('/dokter/jadwal-konsultasi', [ConsultationScheduleController::class, 'store'])->name('dokter.jadwal-konsultasi.store');
-    Route::get('/dokter/jadwal-konsultasi/{id}/edit', [ConsultationScheduleController::class, 'edit'])->name('dokter.jadwal-konsultasi.edit');
-    Route::put('/dokter/jadwal-konsultasi/{id}', [ConsultationScheduleController::class, 'update'])->name('dokter.jadwal-konsultasi.update');
-    Route::delete('/dokter/jadwal-konsultasi/{id}', [ConsultationScheduleController::class, 'destroy'])->name('dokter.jadwal-konsultasi.destroy');
-    Route::get('/dokter/jadwal-konsultasi/create', [ConsultationScheduleController::class, 'create'])->name('dokter.jadwal-konsultasi.create');
-});
-
-// Rute untuk pasien
+// Grup rute untuk Pasien
 Route::middleware(['auth', 'role:pasien'])->group(function () {
     Route::get('/pasien/dashboard', [PasienController::class, 'index'])->name('pasien.dashboard');
     Route::get('/pasien/medical-records', [PasienController::class, 'showRecords'])->name('pasien.records');
     Route::get('/pasien/schedule', [PasienController::class, 'schedule'])->name('pasien.schedule');
-    Route::post('/pasien/feedback', [PasienController::class, 'storeFeedback'])->name('pasien.feedback');
-
-    // Rute profil untuk pasien
-    Route::get('/pasien/profile', [PasienController::class, 'showProfile'])->name('pasien.profile');
-    Route::post('/pasien/profile/update', [PasienController::class, 'updateProfile'])->name('pasien.profile.update');
-    Route::post('/pasien/profile/update-medical', [PasienController::class, 'updateMedicalProfile'])->name('pasien.profile.updateMedical'); // Tambahan
+    Route::post('/pasien/feedback/store', [FeedbackController::class, 'store'])->name('pasien.feedback.store');
+    Route::get('/pasien/appointment/create', [ConsultationScheduleController::class, 'createForPatient'])->name('pasien.appointment.create');
+    Route::post('/pasien/appointment/store', [ConsultationScheduleController::class, 'storeForPatient'])->name('pasien.appointment.store');
+    Route::get('/pasien/profile', [PatientDetailController::class, 'edit'])->name('pasien.profile');
+    Route::post('/pasien/profile/update', [PatientDetailController::class, 'update'])->name('pasien.profile.update');
+    Route::post('/pasien/profile/delete', [PatientDetailController::class, 'destroy'])->name('pasien.profile.delete');
+    Route::post('/pasien/feedback/update/{feedback}', [FeedbackController::class, 'update'])->name('pasien.feedback.update');
 });
 
-// Rute logout
+// Route update status untuk dokter dan pasien
+Route::middleware(['auth'])->post('/appointments/{id}/update-status', [ConsultationScheduleController::class, 'updateStatus'])->name('appointments.update-status');
+
+// Logout
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');

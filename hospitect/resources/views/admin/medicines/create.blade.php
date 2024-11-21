@@ -4,38 +4,37 @@
 <div class="container mx-auto p-4">
     <h1 class="text-2xl font-bold mb-4">Tambah Obat Baru</h1>
 
-    <!-- Form untuk menambahkan obat baru -->
     <form action="{{ route('admin.medicines.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
         @csrf
 
         <div>
-            <label for="nama_obat" class="block text-sm font-medium text-gray-700">Nama Obat</label>
-            <input type="text" name="nama_obat" id="nama_obat" value="{{ old('nama_obat') }}"
+            <label for="name" class="block text-sm font-medium text-gray-700">Nama Obat</label>
+            <input type="text" name="name" id="name" value="{{ old('name') }}"
                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200" required>
         </div>
 
         <div>
-            <label for="deskripsi" class="block text-sm font-medium text-gray-700">Deskripsi</label>
-            <textarea name="deskripsi" id="deskripsi" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200">{{ old('deskripsi') }}</textarea>
+            <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi</label>
+            <textarea name="description" id="description" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200">{{ old('description') }}</textarea>
         </div>
 
         <div>
-            <label for="jenis_obat" class="block text-sm font-medium text-gray-700">Jenis Obat</label>
-            <select name="jenis_obat" id="jenis_obat" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200" required>
-                <option value="biasa" {{ old('jenis_obat') == 'biasa' ? 'selected' : '' }}>Biasa</option>
-                <option value="keras" {{ old('jenis_obat') == 'keras' ? 'selected' : '' }}>Keras</option>
+            <label for="type" class="block text-sm font-medium text-gray-700">Jenis Obat</label>
+            <select name="type" id="type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200" required>
+                <option value="biasa" {{ old('type') == 'biasa' ? 'selected' : '' }}>Biasa</option>
+                <option value="keras" {{ old('type') == 'keras' ? 'selected' : '' }}>Keras</option>
             </select>
         </div>
 
         <div>
-            <label for="stok" class="block text-sm font-medium text-gray-700">Stok</label>
-            <input type="number" name="stok" id="stok" value="{{ old('stok') }}"
+            <label for="stock" class="block text-sm font-medium text-gray-700">Stok</label>
+            <input type="number" name="stock" id="stock" value="{{ old('stock') }}"
                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200" required>
         </div>
 
         <div>
-            <label for="gambar_obat" class="block text-sm font-medium text-gray-700">Gambar Obat</label>
-            <input type="file" name="gambar_obat" id="gambar_obat"
+            <label for="image" class="block text-sm font-medium text-gray-700">Gambar Obat</label>
+            <input type="file" name="image" id="image"
                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200">
         </div>
 

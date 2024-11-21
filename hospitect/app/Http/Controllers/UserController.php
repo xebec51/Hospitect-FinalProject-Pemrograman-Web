@@ -2,8 +2,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Dokter;
-use App\Models\Pasien;
+use App\Models\Doctor; // Model Doctor yang benar
+use App\Models\Patient; // Model Patient yang benar
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -12,7 +12,6 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        // Pastikan middleware ini dapat digunakan tanpa masalah
         $this->middleware('auth');
         $this->middleware('role:admin');
     }
@@ -51,15 +50,15 @@ class UserController extends Controller
         ]);
 
         if ($request->role === 'dokter') {
-            Dokter::create([
+            Doctor::create([
                 'user_id' => $user->id,
-                'license_number' => 'DEFAULT_LICENSE', // Sesuaikan ini sesuai kebutuhan
-                'specialization' => 'DEFAULT_SPECIALIZATION', // Sesuaikan ini sesuai kebutuhan
+                'license_number' => 'DEFAULT_LICENSE',
+                'specialization' => 'DEFAULT_SPECIALIZATION',
             ]);
         } elseif ($request->role === 'pasien') {
-            Pasien::create([
+            Patient::create([
                 'user_id' => $user->id,
-                'insurance_number' => 'DEFAULT_INSURANCE', // Sesuaikan ini sesuai kebutuhan
+                'insurance_number' => 'DEFAULT_INSURANCE',
             ]);
         }
 

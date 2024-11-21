@@ -2,58 +2,149 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Hospitect')</title>
-    <!-- Menggunakan Vite untuk memuat CSS -->
+    <link rel="icon" href="{{ asset('favicon.ico') }}">
     @vite('resources/css/app.css')
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s;
+        }
+        .sidebar-link:hover {
+            background-color: #2d3748;
+        }
+        .active {
+            background-color: #4a5568;
+        }
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s ease-in-out;
+        }
+        #loader.show {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans leading-normal tracking-normal">
-
-    <!-- Navbar -->
-    <nav class="bg-blue-600 p-4 shadow-lg">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="/" class="text-white text-2xl font-bold">Hospitect</a>
-            <ul class="flex space-x-4 text-white">
-                @if(Auth::check())
-                    @if(Auth::user()->role === 'admin')
-                        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-300">Dashboard Admin</a></li>
-                        <li><a href="{{ route('admin.users.index') }}" class="hover:text-gray-300">Manajemen Pengguna</a></li>
-                        <li><a href="{{ route('admin.medicines.index') }}" class="hover:text-gray-300">Manajemen Obat</a></li>
-                    @elseif(Auth::user()->role === 'dokter')
-                        <li><a href="{{ route('dokter.dashboard') }}" class="hover:text-gray-300">Dashboard Dokter</a></li>
-                        <li><a href="{{ route('dokter.medical-records.index') }}" class="hover:text-gray-300">Rekam Medis</a></li>
-                        <li><a href="{{ route('dokter.jadwal-konsultasi.index') }}" class="hover:text-gray-300">Jadwal Konsultasi</a></li>
-                    @elseif(Auth::user()->role === 'pasien')
-                        <li><a href="{{ route('pasien.dashboard') }}" class="hover:text-gray-300">Dashboard Pasien</a></li>
-                        <li><a href="{{ route('pasien.records') }}" class="hover:text-gray-300">Rekam Medis Saya</a></li>
-                        <li><a href="{{ route('pasien.profile') }}" class="hover:text-gray-300">Profil</a></li> <!-- Menu baru untuk profil pasien -->
-                    @endif
-                    <li>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="hover:text-gray-300">Logout</button>
-                        </form>
-                    </li>
-                @else
-                    <li><a href="{{ route('login') }}" class="hover:text-gray-300">Login</a></li>
-                    <li><a href="{{ route('register') }}" class="hover:text-gray-300">Register</a></li>
-                @endif
-            </ul>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="container mx-auto mt-10">
-        @yield('content')
+<body class="bg-gray-100 flex min-h-screen">
+    <!-- Loader -->
+    <div id="loader">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-teal-900"></div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-blue-600 text-white mt-10 p-4 text-center">
-        &copy; {{ date('Y') }} Hospitect. All rights reserved.
-    </footer>
+    @auth
+        <!-- Sidebar -->
+        <aside class="bg-teal-900 text-white w-64 flex-shrink-0 min-h-screen p-6 shadow-lg">
+            <div class="flex items-center mb-8">
+                <h1 class="text-3xl font-bold">Hospitect</h1>
+            </div>
+            <nav>
+                <ul class="space-y-4">
+                    @switch(Auth::user()->role)
+                        @case('admin')
+                            <li><a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard Admin</a></li>
+                            <li><a href="{{ route('admin.users.index') }}" class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Manajemen Pengguna</a></li>
+                            <li><a href="{{ route('admin.medicines.index') }}" class="sidebar-link {{ request()->routeIs('admin.medicines.*') ? 'active' : '' }}">Manajemen Obat</a></li>
+                            @break
+                        @case('dokter')
+                            <li><a href="{{ route('dokter.dashboard') }}" class="sidebar-link {{ request()->routeIs('dokter.dashboard') ? 'active' : '' }}">Dashboard Dokter</a></li>
+                            <li><a href="{{ route('dokter.schedule') }}" class="sidebar-link {{ request()->routeIs('dokter.schedule') ? 'active' : '' }}">Jadwal Konsultasi</a></li>
+                            <li><a href="{{ route('dokter.medical-records.index') }}" class="sidebar-link {{ request()->routeIs('dokter.medical-records.*') ? 'active' : '' }}">Rekam Medis</a></li>
+                            <li><a href="{{ route('dokter.jadwal-konsultasi.index') }}" class="sidebar-link {{ request()->routeIs('dokter.jadwal-konsultasi.*') ? 'active' : '' }}">Kelola Jadwal</a></li>
+                            <li><a href="{{ route('dokter.feedback') }}" class="sidebar-link {{ request()->routeIs('dokter.feedback') ? 'active' : '' }}">Feedback</a></li>
+                            @break
+                        @case('pasien')
+                            <li><a href="{{ route('pasien.dashboard') }}" class="sidebar-link {{ request()->routeIs('pasien.dashboard') ? 'active' : '' }}">Dashboard Pasien</a></li>
+                            <li><a href="{{ route('pasien.schedule') }}" class="sidebar-link {{ request()->routeIs('pasien.schedule') ? 'active' : '' }}">Jadwal Konsultasi Saya</a></li>
+                            <li><a href="{{ route('pasien.records') }}" class="sidebar-link {{ request()->routeIs('pasien.records') ? 'active' : '' }}">Rekam Medis Saya</a></li>
+                            <li><a href="{{ route('pasien.appointment.create') }}" class="sidebar-link {{ request()->routeIs('pasien.appointment.create') ? 'active' : '' }}">Buat Janji Temu</a></li>
+                            @break
+                        @default
+                            <li><span class="block p-2 text-gray-400">Role tidak dikenal</span></li>
+                    @endswitch
+                </ul>
+            </nav>
+        </aside>
+    @endauth
 
-    <!-- Menggunakan Vite untuk memuat JS -->
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col">
+        <!-- Header -->
+        <header class="bg-white text-teal-900 shadow p-4 flex justify-between items-center border-b border-gray-200">
+            <div class="text-2xl font-semibold">Hospitect</div>
+            @auth
+                <div class="relative">
+                    <button id="userMenuButton" class="flex items-center space-x-2 focus:outline-none">
+                        <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : asset('images/OIP.jpg') }}" alt="User Image" class="w-10 h-10 rounded-full border border-teal-900">
+                        <span class="text-teal-900 font-medium">{{ Auth::user()->name }}</span>
+                    </button>
+                    <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white shadow-md rounded-md overflow-hidden z-50">
+                        @php
+                            $profileRoute = Auth::user()->role . '.profile';
+                        @endphp
+                        @if (Route::has($profileRoute))
+                            <a href="{{ route($profileRoute) }}" class="block px-4 py-2 text-gray-700 hover:bg-teal-100">Profil</a>
+                        @endif
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-teal-100">Logout</button>
+                        </form>
+                    </div>
+                </div>
+            @endauth
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 bg-white shadow-inner rounded-lg">
+            @yield('content')
+        </main>
+    </div>
+
+    <script>
+        // User Menu Toggle
+        const userMenuButton = document.getElementById('userMenuButton');
+        if (userMenuButton) {
+            userMenuButton.addEventListener('click', function () {
+                document.getElementById('userMenu').classList.toggle('hidden');
+            });
+        }
+
+        // Loader Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const loader = document.getElementById('loader');
+            const links = document.querySelectorAll('a');
+
+            links.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (link.href.startsWith(window.location.origin) && !e.defaultPrevented) {
+                        loader.classList.add('show');
+                    }
+                });
+            });
+
+            window.addEventListener('pageshow', () => {
+                if (loader) loader.classList.remove('show');
+            });
+
+            loader.classList.remove('show');
+        });
+    </script>
+
     @vite('resources/js/app.js')
 </body>
 </html>

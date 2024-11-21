@@ -9,8 +9,22 @@ class Medicine extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nama_obat', 'deskripsi', 'jenis_obat', 'stok', 'gambar_obat'];
-    protected $primaryKey = 'id_obat';
-    public $incrementing = true;
-    protected $keyType = 'int';
+    protected $fillable = ['name', 'description', 'type', 'stock'];
+
+    public function expiredMedicines()
+    {
+        return $this->hasMany(ExpiredMedicine::class, 'medicine_id', 'id');
+    }
+
+    public function medicalRecords()
+    {
+        return $this->belongsToMany(MedicalRecord::class, 'medical_record_medicines')
+                    ->withPivot('dosage', 'instructions');
+    }
+
+    public function getAvailableStock()
+    {
+        $expiredStock = $this->expiredMedicines()->sum('quantity');
+        return $this->stock - $expiredStock;
+    }
 }

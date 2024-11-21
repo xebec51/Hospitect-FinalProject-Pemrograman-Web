@@ -19,7 +19,7 @@ class AdminController extends Controller
         $totalUsers = User::count();
         $totalDoctors = User::where('role', 'dokter')->count();
         $totalPatients = User::where('role', 'pasien')->count();
-        $activeMedicines = Medicine::where('stok', '>', 0)->count();
+        $activeMedicines = Medicine::where('stock', '>', 0)->count(); // Ganti 'stok' dengan 'stock'
 
         // Menambahkan total laporan operasional, misalnya dari tabel medical_records
         $totalReports = DB::table('medical_records')->count();

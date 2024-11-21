@@ -13,9 +13,9 @@
         <ul class="mt-4">
             @foreach($recentMedicalRecords as $record)
                 <li class="border-b py-2">
-                    <strong>Nama Pasien:</strong> {{ $record->pasien ? $record->pasien->user->name : 'Tidak diketahui' }}<br>
-                    <strong>Tindakan:</strong> {{ $record->tindakan }}<br>
-                    <strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($record->tanggal_periksa)->format('d M Y') }}
+                    <strong>Nama Pasien:</strong> {{ $record->patient->user->name ?? 'Tidak diketahui' }}<br>
+                    <strong>Tindakan:</strong> {{ $record->treatment ?? 'Tidak ada tindakan' }}<br>
+                    <strong>Tanggal:</strong> {{ $record->record_date->format('d M Y') }}
                 </li>
             @endforeach
         </ul>

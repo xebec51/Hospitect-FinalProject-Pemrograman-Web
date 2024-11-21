@@ -1,4 +1,3 @@
-<!-- resources/views/dokter/schedule/index.blade.php -->
 @extends('layouts.app')
 
 @section('title', 'Jadwal Konsultasi Dokter')
@@ -24,18 +23,18 @@
                 <th class="border border-gray-200 p-2 text-left">Dokter</th>
                 <th class="border border-gray-200 p-2 text-left">Pasien</th>
                 <th class="border border-gray-200 p-2 text-left">Status</th>
-                <th class="border border-gray-200 p-2 text-left">Catatan</th>
                 <th class="border border-gray-200 p-2 text-left">Aksi</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($schedules as $schedule)
                 <tr class="hover:bg-gray-50">
-                    <td class="border border-gray-200 p-2">{{ \Carbon\Carbon::parse($schedule->tanggal)->format('d M Y') }}</td>
-                    <td class="border border-gray-200 p-2">{{ $schedule->dokter->name ?? 'N/A' }}</td>
-                    <td class="border border-gray-200 p-2">{{ $schedule->pasien->name ?? 'N/A' }}</td>
-                    <td class="border border-gray-200 p-2">{{ $schedule->status }}</td>
-                    <td class="border border-gray-200 p-2">{{ $schedule->catatan }}</td>
+                    <td class="border border-gray-200 p-2">
+                        {{ is_object($schedule->date) ? $schedule->date->format('d M Y') : \Carbon\Carbon::parse($schedule->date)->format('d M Y') }}
+                    </td>
+                    <td class="border border-gray-200 p-2">{{ $schedule->doctor->user->name ?? 'Tidak diketahui' }}</td>
+                    <td class="border border-gray-200 p-2">{{ $schedule->patient->user->name ?? 'Tidak diketahui' }}</td>
+                    <td class="border border-gray-200 p-2">{{ ucfirst($schedule->status) }}</td>
                     <td class="border border-gray-200 p-2">
                         <a href="{{ route('dokter.jadwal-konsultasi.edit', $schedule->id) }}" class="text-blue-600 hover:underline">Edit</a>
                         <form action="{{ route('dokter.jadwal-konsultasi.destroy', $schedule->id) }}" method="POST" style="display: inline;">
@@ -43,11 +42,19 @@
                             @method('DELETE')
                             <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Apakah Anda yakin ingin menghapus?')">Hapus</button>
                         </form>
+                        <form action="{{ route('appointments.update-status', $schedule->id) }}" method="POST" class="inline-block">
+                            @csrf
+                            <select name="status" onchange="this.form.submit()" class="border border-gray-300 rounded">
+                                <option value="scheduled" {{ $schedule->status == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
+                                <option value="completed" {{ $schedule->status == 'completed' ? 'selected' : '' }}>Completed</option>
+                                <option value="cancelled" {{ $schedule->status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                            </select>
+                        </form>
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center p-4">Tidak ada jadwal konsultasi yang tersedia.</td>
+                    <td colspan="5" class="text-center p-4">Tidak ada jadwal konsultasi yang tersedia.</td>
                 </tr>
             @endforelse
         </tbody>

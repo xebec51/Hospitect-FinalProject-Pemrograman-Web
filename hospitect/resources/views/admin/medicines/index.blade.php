@@ -28,20 +28,20 @@
             <tbody>
                 @forelse ($medicines as $medicine)
                     <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 p-2">{{ $medicine->nama_obat }}</td>
-                        <td class="border border-gray-200 p-2">{{ $medicine->deskripsi }}</td>
-                        <td class="border border-gray-200 p-2">{{ ucfirst($medicine->jenis_obat) }}</td>
-                        <td class="border border-gray-200 p-2">{{ $medicine->stok }}</td>
+                        <td class="border border-gray-200 p-2">{{ $medicine->name }}</td>
+                        <td class="border border-gray-200 p-2">{{ $medicine->description }}</td>
+                        <td class="border border-gray-200 p-2">{{ ucfirst($medicine->type) }}</td>
+                        <td class="border border-gray-200 p-2">{{ $medicine->stock }}</td>
                         <td class="border border-gray-200 p-2">
-                            @if($medicine->gambar_obat)
-                                <img src="{{ asset('storage/' . $medicine->gambar_obat) }}" alt="Gambar Obat" class="h-16 w-16 object-cover">
+                            @if($medicine->image)
+                                <img src="{{ asset('storage/' . $medicine->image) }}" alt="Gambar Obat" class="h-16 w-16 object-cover">
                             @else
                                 <span class="text-gray-500">Tidak ada gambar</span>
                             @endif
                         </td>
                         <td class="border border-gray-200 p-2 flex space-x-2">
-                            <a href="{{ route('admin.medicines.edit', $medicine->id_obat) }}" class="text-blue-600 hover:underline">Edit</a>
-                            <form action="{{ route('admin.medicines.destroy', $medicine->id_obat) }}" method="POST" style="display: inline;">
+                            <a href="{{ route('admin.medicines.edit', $medicine->id) }}" class="text-blue-600 hover:underline">Edit</a>
+                            <form action="{{ route('admin.medicines.destroy', $medicine->id) }}" method="POST" style="display: inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Apakah Anda yakin ingin menghapus?')">Hapus</button>

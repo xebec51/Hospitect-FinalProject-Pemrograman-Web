@@ -9,14 +9,28 @@ class Feedback extends Model
 {
     use HasFactory;
 
+    protected $table = 'feedbacks';
+
     protected $fillable = [
+        'appointment_id',
         'patient_id',
-        'comments',
-        'rating'
+        'rating',
+        'comment',
     ];
 
+    /**
+     * Relasi ke model Appointment.
+     */
+    public function appointment()
+    {
+        return $this->belongsTo(Appointment::class, 'appointment_id', 'id');
+    }
+
+    /**
+     * Relasi ke model Patient.
+     */
     public function patient()
     {
-        return $this->belongsTo(User::class, 'patient_id');
+        return $this->belongsTo(Patient::class, 'patient_id', 'id');
     }
 }

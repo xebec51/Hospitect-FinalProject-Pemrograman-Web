@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Medicine;
+use Illuminate\Support\Facades\Storage;
 
 class MedicineController extends Controller
 {
@@ -21,13 +22,21 @@ class MedicineController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_obat' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'jenis_obat' => 'required|string',
-            'stok' => 'required|integer',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'type' => 'required|string',
+            'stock' => 'required|integer',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        Medicine::create($request->all());
+        $data = $request->only(['name', 'description', 'type', 'stock']);
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('medicines', 'public');
+        }
+
+
+        Medicine::create($data);
 
         return redirect()->route('admin.medicines.index')->with('success', 'Obat berhasil ditambahkan');
     }
@@ -40,19 +49,33 @@ class MedicineController extends Controller
     public function update(Request $request, Medicine $medicine)
     {
         $request->validate([
-            'nama_obat' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'jenis_obat' => 'required|string',
-            'stok' => 'required|integer',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'type' => 'required|string',
+            'stock' => 'required|integer',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $medicine->update($request->all());
+        $data = $request->only(['name', 'description', 'type', 'stock']);
+
+        if ($request->hasFile('image')) {
+            // Hapus gambar lama jika ada
+            if ($medicine->image) {
+                Storage::disk('public')->delete($medicine->image);
+            }
+            $data['image'] = $request->file('image')->store('medicines', 'public');
+        }
+
+        $medicine->update($data);
 
         return redirect()->route('admin.medicines.index')->with('success', 'Obat berhasil diperbarui');
     }
 
     public function destroy(Medicine $medicine)
     {
+        if ($medicine->image) {
+            Storage::disk('public')->delete($medicine->image);
+        }
         $medicine->delete();
         return redirect()->route('admin.medicines.index')->with('success', 'Obat berhasil dihapus');
     }

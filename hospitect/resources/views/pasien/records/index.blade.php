@@ -1,5 +1,3 @@
-<!-- D:\GitHub\Hospitect-FinalProject-Pemrograman-Web\hospitect\resources\views\pasien\records\index.blade.php -->
-
 @extends('layouts.app')
 
 @section('title', 'Rekam Medis Saya')
@@ -17,35 +15,45 @@
     <table class="min-w-full bg-white border border-gray-200">
         <thead class="bg-gray-100">
             <tr>
-                <th class="border border-gray-200 p-2 text-left">Tanggal Periksa</th>
-                <th class="border border-gray-200 p-2 text-left">Dokter</th>
-                <th class="border border-gray-200 p-2 text-left">Tindakan</th>
-                <th class="border border-gray-200 p-2 text-left">Obat</th>
+                <th class="py-2 px-4 border-b">Tanggal</th>
+                <th class="py-2 px-4 border-b">Dokter</th>
+                <th class="py-2 px-4 border-b">Catatan</th>
+                <th class="py-2 px-4 border-b">Aksi</th>
             </tr>
         </thead>
         <tbody>
-            @forelse ($medicalRecords as $record)
-                <tr class="hover:bg-gray-50">
-                    <td class="border border-gray-200 p-2">{{ \Carbon\Carbon::parse($record->tanggal_periksa)->format('d M Y') }}</td>
-                    <td class="border border-gray-200 p-2">{{ $record->dokter->name ?? 'Tidak diketahui' }}</td>
-                    <td class="border border-gray-200 p-2">{{ $record->tindakan }}</td>
-                    <td class="border border-gray-200 p-2">
-                        @if (is_array($record->obat) && !empty($record->obat))
-                            <ul>
-                                @foreach ($record->obat as $medicine)
-                                    <li>{{ $medicine }}</li>
-                                @endforeach
-                            </ul>
+            @foreach ($appointments as $appointment)
+                <tr>
+                    <td class="py-2 px-4 border-b">{{ $appointment->date }}</td>
+                    <td class="py-2 px-4 border-b">{{ $appointment->doctor->user->name }}</td>
+                    <td class="py-2 px-4 border-b">{{ $appointment->notes }}</td>
+                    <td class="py-2 px-4 border-b">
+                        @if ($appointment->status == 'completed' && $appointment->date >= \Carbon\Carbon::now()->subDays(3))
+                            <form action="{{ route('pasien.feedback.store') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="appointment_id" value="{{ $appointment->id }}">
+                                <div class="mb-2">
+                                    <label for="rating" class="block text-sm font-medium text-gray-700">Rating</label>
+                                    <select name="rating" id="rating" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm">
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label for="comment" class="block text-sm font-medium text-gray-700">Komentar</label>
+                                    <textarea name="comment" id="comment" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"></textarea>
+                                </div>
+                                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Kirim Feedback</button>
+                            </form>
                         @else
-                            Tidak ada
+                            <span class="text-gray-500">Tidak dapat memberikan feedback</span>
                         @endif
                     </td>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="4" class="text-center p-4">Tidak ada rekam medis yang ditemukan.</td>
-                </tr>
-            @endforelse
+            @endforeach
         </tbody>
     </table>
 </div>

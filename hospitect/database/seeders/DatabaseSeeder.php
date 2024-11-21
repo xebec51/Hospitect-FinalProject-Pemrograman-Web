@@ -2,23 +2,26 @@
 
 namespace Database\Seeders;
 
+use App\Models\Doctor;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
+    public function run()
     {
-        // Panggil semua seeder yang dibutuhkan
         $this->call([
-            UserSeeder::class,
-            MedicineSeeder::class,
-            MedicalRecordSeeder::class,
-            JadwalKonsultasiSeeder::class,
-            PatientDetailSeeder::class,
-            // Tambahkan seeder lainnya di sini jika diperlukan
+            UsersTableSeeder::class,
+            DoctorsTableSeeder::class,
+            PatientsTableSeeder::class,
+            DoctorDetailsTableSeeder::class, // Pastikan nama ini benar
+            PatientDetailsTableSeeder::class,
+            MedicinesTableSeeder::class,
+            ExpiredMedicinesTableSeeder::class,
+            AppointmentsTableSeeder::class,
+            MedicalRecordsTableSeeder::class,
+            FeedbacksTableSeeder::class,
+            MedicalRecordMedicinesTableSeeder::class,
+            DoctorAvailabilitiesTableSeeder::class,
         ]);
     }
 }

@@ -1,6 +1,4 @@
 <?php
-// app/Models/PatientDetail.php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,7 +8,6 @@ class PatientDetail extends Model
 {
     use HasFactory;
 
-    protected $table = 'patient_details';
     protected $fillable = [
         'patient_id',
         'phone',
@@ -18,14 +15,14 @@ class PatientDetail extends Model
         'address',
         'chronic_diseases',
         'allergies',
-        'blood_type'
+        'blood_type',
     ];
 
-    // Relasi ke Pasien
+    /**
+     * Relasi dengan model Patient.
+     */
     public function patient()
     {
-        return $this->belongsTo(Pasien::class, 'patient_id');
+        return $this->belongsTo(Patient::class, 'patient_id', 'id');
     }
 }
-
-?>

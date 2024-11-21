@@ -1,5 +1,3 @@
-<!-- resources/views/pasien/profile.blade.php -->
-
 @extends('layouts.app')
 
 @section('title', 'Profil Pasien')
@@ -14,29 +12,27 @@
         </div>
     @endif
 
-    <!-- Navigasi Tab -->
-    <div class="mb-6">
-        <ul class="flex border-b">
-            <li class="mr-1">
-                <a href="#informasi-pribadi" class="bg-blue-600 text-white hover:bg-blue-700 inline-block py-2 px-4 rounded-t">Informasi Pribadi</a>
-            </li>
-            <li class="mr-1">
-                <a href="#informasi-medis" class="bg-blue-600 text-white hover:bg-blue-700 inline-block py-2 px-4 rounded-t">Informasi Medis</a>
-            </li>
-        </ul>
+    <div id="profile-view" class="bg-white shadow-md rounded p-4">
+        <h2 class="text-xl font-semibold mb-4">Informasi Pribadi</h2>
+        <p><strong>Nama Lengkap:</strong> {{ Auth::user()->name }}</p>
+        <p><strong>Nomor Telepon:</strong> {{ $patientDetails->phone ?? 'Tidak tersedia' }}</p>
+        <p><strong>Tanggal Lahir:</strong> {{ $patientDetails->date_of_birth ?? 'Tidak tersedia' }}</p>
+        <p><strong>Alamat:</strong> {{ $patientDetails->address ?? 'Tidak tersedia' }}</p>
+
+        <h2 class="text-xl font-semibold mt-6 mb-4">Informasi Medis</h2>
+        <p><strong>Riwayat Medis:</strong> {{ $patient->medical_history ?? 'Tidak tersedia' }}</p>
+        <p><strong>Nomor Asuransi:</strong> {{ $patient->insurance_number ?? 'Tidak tersedia' }}</p>
+        <p><strong>Penyakit Kronis:</strong> {{ $patientDetails->chronic_diseases ?? 'Tidak tersedia' }}</p>
+        <p><strong>Alergi:</strong> {{ $patientDetails->allergies ?? 'Tidak tersedia' }}</p>
+        <p><strong>Golongan Darah:</strong> {{ $patientDetails->blood_type ?? 'Tidak tersedia' }}</p>
+
+        <button id="edit-profile-btn" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">Edit Profil</button>
     </div>
 
-    <!-- Form untuk Informasi Pribadi -->
-    <div id="informasi-pribadi">
+    <div id="profile-edit" class="bg-white shadow-md rounded p-4" style="display: none;">
         <form action="{{ route('pasien.profile.update') }}" method="POST">
             @csrf
             <h2 class="text-xl font-semibold mb-4">Informasi Pribadi</h2>
-
-            <div class="mb-4">
-                <label for="name" class="block font-bold mb-2">Nama Lengkap</label>
-                <input type="text" id="name" name="name" value="{{ old('name', Auth::user()->name) }}" class="w-full border border-gray-300 p-2 rounded" readonly>
-            </div>
-
             <div class="mb-4">
                 <label for="phone" class="block font-bold mb-2">Nomor Telepon</label>
                 <input type="text" id="phone" name="phone" value="{{ old('phone', $patientDetails->phone ?? '') }}" class="w-full border border-gray-300 p-2 rounded">
@@ -61,16 +57,7 @@
                 @enderror
             </div>
 
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Perbarui Informasi Pribadi</button>
-        </form>
-    </div>
-
-    <!-- Form untuk Informasi Medis -->
-    <div id="informasi-medis" class="mt-8">
-        <form action="{{ route('pasien.profile.updateMedical') }}" method="POST">
-            @csrf
-            <h2 class="text-xl font-semibold mb-4">Informasi Medis</h2>
-
+            <h2 class="text-xl font-semibold mt-6 mb-4">Informasi Medis</h2>
             <div class="mb-4">
                 <label for="medical_history" class="block font-bold mb-2">Riwayat Medis</label>
                 <textarea id="medical_history" name="medical_history" class="w-full border border-gray-300 p-2 rounded">{{ old('medical_history', $patient->medical_history ?? '') }}</textarea>
@@ -87,32 +74,21 @@
                 @enderror
             </div>
 
-            <div class="mb-4">
-                <label for="chronic_diseases" class="block font-bold mb-2">Penyakit Kronis</label>
-                <input type="text" id="chronic_diseases" name="chronic_diseases" value="{{ old('chronic_diseases', $patientDetails->chronic_diseases ?? '') }}" class="w-full border border-gray-300 p-2 rounded">
-                @error('chronic_diseases')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <div class="mb-4">
-                <label for="allergies" class="block font-bold mb-2">Alergi</label>
-                <input type="text" id="allergies" name="allergies" value="{{ old('allergies', $patientDetails->allergies ?? '') }}" class="w-full border border-gray-300 p-2 rounded">
-                @error('allergies')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <div class="mb-4">
-                <label for="blood_type" class="block font-bold mb-2">Golongan Darah</label>
-                <input type="text" id="blood_type" name="blood_type" value="{{ old('blood_type', $patientDetails->blood_type ?? '') }}" class="w-full border border-gray-300 p-2 rounded">
-                @error('blood_type')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Perbarui Informasi Medis</button>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Simpan Perubahan</button>
+            <button type="button" id="cancel-edit-btn" class="bg-gray-500 text-white px-4 py-2 rounded ml-2">Batal</button>
         </form>
     </div>
 </div>
+
+<script>
+    document.getElementById('edit-profile-btn').addEventListener('click', function () {
+        document.getElementById('profile-view').style.display = 'none';
+        document.getElementById('profile-edit').style.display = 'block';
+    });
+
+    document.getElementById('cancel-edit-btn').addEventListener('click', function () {
+        document.getElementById('profile-edit').style.display = 'none';
+        document.getElementById('profile-view').style.display = 'block';
+    });
+</script>
 @endsection

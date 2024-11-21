@@ -1,31 +1,43 @@
 <?php
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class MedicalRecord extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['id_dokter', 'id_pasien', 'tindakan', 'tanggal_periksa', 'obat'];
-    protected $primaryKey = 'id_rekam_medis';
-    public $incrementing = true;
+    protected $fillable = ['doctor_id', 'patient_id', 'diagnosis', 'treatment', 'record_date'];
 
     protected $casts = [
-        'tanggal_periksa' => 'datetime',
-        'obat' => 'array', // Meng-cast kolom 'obat' sebagai array untuk menyimpan JSON
+        'record_date' => 'datetime',
     ];
 
-    // Relasi ke pasien
-    public function pasien()
+    /**
+     * Relasi ke model Patient.
+     */
+    public function patient()
     {
-        return $this->belongsTo(User::class, 'id_pasien', 'id');
+        return $this->belongsTo(Patient::class, 'patient_id', 'id');
     }
 
-    // Relasi ke dokter
-    public function dokter()
+    /**
+     * Relasi ke model Doctor.
+     */
+    public function doctor()
     {
-        return $this->belongsTo(User::class, 'id_dokter', 'id');
+        return $this->belongsTo(Doctor::class, 'doctor_id', 'id');
+    }
+
+    /**
+     * Relasi ke model Medicine.
+     */
+    public function medicines()
+    {
+        return $this->belongsToMany(Medicine::class, 'medical_record_medicines')
+                    ->withPivot('dosage', 'instructions');
     }
 }
+?>
