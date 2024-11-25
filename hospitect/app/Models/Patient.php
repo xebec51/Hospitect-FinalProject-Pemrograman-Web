@@ -1,10 +1,18 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User; // Pastikan model User diimpor
+use App\Models\User;
 
+/**
+ * @property User $user
+ * @property PatientDetail $details
+ * @property Appointment[] $appointments
+ * @property MedicalRecord[] $medicalRecords
+ * @property Feedback[] $feedbacks
+ */
 class Patient extends Model
 {
     use HasFactory;
@@ -13,7 +21,6 @@ class Patient extends Model
 
     /**
      * Relasi dengan model User.
-     * Menghubungkan patient ke user terkait.
      */
     public function user()
     {
@@ -52,4 +59,3 @@ class Patient extends Model
         return $this->hasMany(Feedback::class, 'patient_id', 'id');
     }
 }
-?>

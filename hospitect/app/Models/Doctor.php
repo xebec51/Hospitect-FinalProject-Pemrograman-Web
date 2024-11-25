@@ -1,9 +1,18 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
+/**
+ * @property User $user
+ * @property MedicalRecord[] $medicalRecords
+ * @property Appointment[] $appointments
+ * @property DoctorDetail $details
+ * @property DoctorAvailability[] $availabilities
+ */
 class Doctor extends Model
 {
     use HasFactory;
@@ -43,7 +52,7 @@ class Doctor extends Model
     }
 
     /**
-     * Relasi dengan availabilities.
+     * Relasi dengan ketersediaan dokter.
      */
     public function availabilities()
     {

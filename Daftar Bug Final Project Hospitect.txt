@@ -1,0 +1,8 @@
+Daftar Bug Final Project Hospitect
+1. Ketika login menggunakan akun role admin, kemudian mengubah role akun sendiri, maka ketika berhasil diubah akan langsung menampilkan "403 | Unauthorized". Saya ingin kamu memperbaiki hal ini✔️
+2. Ketika kita mencoba login menggunakan akun pasien yang baru saja dibuat, maka akan muncul pesan error✔️
+3. Ketika membuat akun user doktor terbaru, maka hanya menambahkan nilai pada tabel users. Pembuatan tersebut tidak menambahkan nilai pada tabel doctors sehingga menu medical records akan menampilkan error✔️
+
+Hal-Hal yang perlu diperbaiki
+1. Perbaikan kolom feedbacks agar bisa di edit
+2. Waktu janji agar sesuai dengan jam kerja. Dan pilihan jam kerja nya itu dalam dropdown

@@ -28,7 +28,20 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Redirect berdasarkan role pengguna
+        $role = Auth::user()->role;
+
+        switch ($role) {
+            case 'admin':
+                return redirect()->route('admin.dashboard');
+            case 'dokter':
+                return redirect()->route('dokter.dashboard');
+            case 'pasien':
+                return redirect()->route('pasien.dashboard');
+            default:
+                Auth::logout(); // Logout jika role tidak dikenali
+                return redirect('/login')->withErrors(['error' => 'Role tidak dikenali. Hubungi admin.']);
+        }
     }
 
     /**

@@ -1,12 +1,14 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Doctor; // Model Doctor yang benar
-use App\Models\Patient; // Model Patient yang benar
+use App\Models\Doctor;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -49,16 +51,17 @@ class UserController extends Controller
             'role' => $request->role,
         ]);
 
+        // Tambahkan entri di tabel doctor atau patient jika role sesuai
         if ($request->role === 'dokter') {
             Doctor::create([
                 'user_id' => $user->id,
-                'license_number' => 'DEFAULT_LICENSE',
-                'specialization' => 'DEFAULT_SPECIALIZATION',
+                'license_number' => $request->input('license_number', 'DEFAULT_LICENSE'),
+                'specialization' => $request->input('specialization', 'DEFAULT_SPECIALIZATION'),
             ]);
         } elseif ($request->role === 'pasien') {
             Patient::create([
                 'user_id' => $user->id,
-                'insurance_number' => 'DEFAULT_INSURANCE',
+                'insurance_number' => $request->input('insurance_number', 'DEFAULT_INSURANCE'),
             ]);
         }
 
@@ -85,14 +88,39 @@ class UserController extends Controller
                 ->withInput();
         }
 
+        // Periksa apakah pengguna sedang mengubah perannya sendiri
+        $isSelfRoleChange = (Auth::id() === $user->id && $request->role !== $user->role);
+
+        // Perbarui data pengguna
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
         ]);
 
+        // Perbarui kata sandi jika diisi
         if ($request->filled('password')) {
             $user->update(['password' => Hash::make($request->password)]);
+        }
+
+        // Tangani perubahan role dokter/pasien
+        if ($request->role === 'dokter' && !$user->doctor) {
+            Doctor::create([
+                'user_id' => $user->id,
+                'license_number' => $request->input('license_number', 'UPDATED_LICENSE'),
+                'specialization' => $request->input('specialization', 'UPDATED_SPECIALIZATION'),
+            ]);
+        } elseif ($request->role === 'pasien' && !$user->patient) {
+            Patient::create([
+                'user_id' => $user->id,
+                'insurance_number' => $request->input('insurance_number', 'UPDATED_INSURANCE'),
+            ]);
+        }
+
+        // Jika peran pengguna diubah sendiri, logout dan minta login kembali
+        if ($isSelfRoleChange) {
+            Auth::logout();
+            return redirect()->route('login')->with('info', 'Your role has been updated. Please log in again.');
         }
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');

@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\MedicalRecord;
 use App\Models\Appointment;
 use App\Models\Feedback;
-use App\Models\Patient;
 
 class PasienController extends Controller
 {
@@ -16,22 +15,23 @@ class PasienController extends Controller
      */
     public function index()
     {
-        $patient = Auth::user()->patient; // Pastikan relasi "patient" ada di model User
+        $patient = Auth::user()->patient;
 
         if (!$patient) {
-            abort(404, 'Pasien tidak ditemukan.');
+            return abort(404, 'Pasien tidak ditemukan.');
         }
 
         $medicalRecords = MedicalRecord::where('patient_id', $patient->id)
             ->latest()
             ->take(5)
-            ->with('doctor.user') // Relasi untuk data dokter
+            ->with('doctor.user') // Eager load dokter
             ->get();
 
         $upcomingAppointments = Appointment::where('patient_id', $patient->id)
             ->where('date', '>=', now())
-            ->with('doctor.user') // Relasi untuk data dokter
+            ->with('doctor.user') // Eager load dokter
             ->orderBy('date')
+            ->orderBy('time')
             ->get();
 
         return view('pasien.dashboard', compact('medicalRecords', 'upcomingAppointments'));
@@ -45,11 +45,12 @@ class PasienController extends Controller
         $patient = Auth::user()->patient;
 
         if (!$patient) {
-            abort(404, 'Pasien tidak ditemukan.');
+            return abort(404, 'Pasien tidak ditemukan.');
         }
 
         $appointments = Appointment::where('patient_id', $patient->id)
-            ->with('doctor.user')
+            ->with('doctor.user') // Eager load dokter
+            ->orderBy('date', 'desc')
             ->get();
 
         return view('pasien.records.index', compact('appointments'));
@@ -63,12 +64,13 @@ class PasienController extends Controller
         $patient = Auth::user()->patient;
 
         if (!$patient) {
-            abort(404, 'Pasien tidak ditemukan.');
+            return abort(404, 'Pasien tidak ditemukan.');
         }
 
         $appointments = Appointment::where('patient_id', $patient->id)
-            ->with('doctor.user')
+            ->with('doctor.user') // Eager load dokter
             ->orderBy('date')
+            ->orderBy('time')
             ->get();
 
         return view('pasien.schedule', compact('appointments'));
@@ -82,21 +84,19 @@ class PasienController extends Controller
         $patient = Auth::user()->patient;
 
         if (!$patient) {
-            abort(404, 'Pasien tidak ditemukan.');
+            return abort(404, 'Pasien tidak ditemukan.');
         }
 
         $request->validate([
             'appointment_id' => 'required|exists:appointments,id',
             'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string',
+            'comment' => 'nullable|string|max:500',
         ]);
 
-        Feedback::create([
-            'appointment_id' => $request->appointment_id,
-            'patient_id' => $patient->id,
-            'rating' => $request->rating,
-            'comment' => $request->comment,
-        ]);
+        Feedback::updateOrCreate(
+            ['appointment_id' => $request->appointment_id, 'patient_id' => $patient->id],
+            ['rating' => $request->rating, 'comment' => $request->comment]
+        );
 
         return redirect()->route('pasien.schedule')->with('success', 'Umpan balik berhasil disimpan.');
     }
@@ -109,7 +109,7 @@ class PasienController extends Controller
         $patient = Auth::user()->patient;
 
         if (!$patient) {
-            abort(404, 'Pasien tidak ditemukan.');
+            return abort(404, 'Pasien tidak ditemukan.');
         }
 
         return view('pasien.profile', compact('patient'));
@@ -123,7 +123,7 @@ class PasienController extends Controller
         $patient = Auth::user()->patient;
 
         if (!$patient) {
-            abort(404, 'Pasien tidak ditemukan.');
+            return abort(404, 'Pasien tidak ditemukan.');
         }
 
         $request->validate([
@@ -149,15 +149,15 @@ class PasienController extends Controller
         $patient = Auth::user()->patient;
 
         if (!$patient) {
-            abort(404, 'Pasien tidak ditemukan.');
+            return abort(404, 'Pasien tidak ditemukan.');
         }
 
         $request->validate([
             'medical_history' => 'nullable|string',
-            'insurance_number' => 'nullable|string',
+            'insurance_number' => 'nullable|string|max:50',
             'chronic_diseases' => 'nullable|string',
             'allergies' => 'nullable|string',
-            'blood_type' => 'nullable|string',
+            'blood_type' => 'nullable|string|max:5',
         ]);
 
         $patient->medicalDetails()->updateOrCreate([], [

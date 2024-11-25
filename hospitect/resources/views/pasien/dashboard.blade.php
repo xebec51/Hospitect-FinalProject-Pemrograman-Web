@@ -5,7 +5,7 @@
 @section('content')
 <div class="bg-white shadow-md rounded p-6">
     <h1 class="text-3xl font-bold mb-4">Dashboard Pasien</h1>
-    <p>Selamat datang, {{ Auth::user()->name }}! Berikut rekam medis Anda:</p>
+    <p>Selamat datang, {{ Auth::user()->name }}!</p>
 
     <h2 class="text-xl font-semibold mt-4">Rekam Medis Terbaru</h2>
     @if($medicalRecords->isEmpty())

@@ -4,14 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Patient;
+use App\Models\Doctor;
+use App\Models\Feedback;
 
+/**
+ * @property Patient $patient
+ * @property Doctor $doctor
+ * @property Feedback $feedback
+ */
 class Appointment extends Model
 {
     use HasFactory;
 
-    /**
-     * Kolom yang dapat diisi.
-     */
     protected $fillable = [
         'patient_id',
         'doctor_id',
@@ -35,7 +40,7 @@ class Appointment extends Model
     public function patient()
     {
         return $this->belongsTo(Patient::class, 'patient_id', 'id')
-            ->with('user'); // Memastikan data user pasien tersedia
+            ->withDefault(); // Mencegah error saat data pasien tidak ditemukan
     }
 
     /**
@@ -44,7 +49,7 @@ class Appointment extends Model
     public function doctor()
     {
         return $this->belongsTo(Doctor::class, 'doctor_id', 'id')
-            ->with('user'); // Memastikan data user dokter tersedia
+            ->withDefault(); // Mencegah error saat data dokter tidak ditemukan
     }
 
     /**
@@ -56,7 +61,11 @@ class Appointment extends Model
     }
 
     /**
-     * Relasi untuk mendukung pengelompokan jadwal berdasarkan status.
+     * Scope untuk janji temu berdasarkan status.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $status
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeByStatus($query, $status)
     {
@@ -64,7 +73,10 @@ class Appointment extends Model
     }
 
     /**
-     * Relasi untuk mendukung pengelompokan jadwal berdasarkan tanggal.
+     * Scope untuk janji temu yang akan datang.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeUpcoming($query)
     {

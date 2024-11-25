@@ -12,18 +12,20 @@ use Illuminate\Support\Facades\Auth;
 
 class ConsultationScheduleController extends Controller
 {
-    /**
-     * List semua jadwal konsultasi.
-     */
     public function index()
     {
-        $schedules = Appointment::with(['doctor.user', 'patient.user'])->get();
+        $schedules = Appointment::with([
+            'doctor' => function ($query) {
+                $query->with('user');
+            },
+            'patient' => function ($query) {
+                $query->with('user');
+            }
+        ])->get();
+
         return view('dokter.schedule.index', compact('schedules'));
     }
 
-    /**
-     * Tampilkan form untuk dokter membuat jadwal.
-     */
     public function create()
     {
         $dokters = Doctor::with('user')->get();
@@ -31,9 +33,6 @@ class ConsultationScheduleController extends Controller
         return view('dokter.schedule.create', compact('dokters', 'pasiens'));
     }
 
-    /**
-     * Simpan jadwal yang dibuat oleh dokter.
-     */
     public function store(Request $request)
     {
         $this->validateSchedule($request);
@@ -43,21 +42,23 @@ class ConsultationScheduleController extends Controller
         return redirect()->route('dokter.jadwal-konsultasi.index')->with('success', 'Jadwal konsultasi berhasil ditambahkan.');
     }
 
-    /**
-     * Edit jadwal konsultasi.
-     */
     public function edit($id)
     {
-        $schedule = Appointment::with(['doctor.user', 'patient.user'])->findOrFail($id);
+        $schedule = Appointment::with([
+            'doctor' => function ($query) {
+                $query->with('user');
+            },
+            'patient' => function ($query) {
+                $query->with('user');
+            }
+        ])->findOrFail($id);
+
         $dokters = Doctor::with('user')->get();
         $pasiens = Patient::with('user')->get();
 
         return view('dokter.schedule.edit', compact('schedule', 'dokters', 'pasiens'));
     }
 
-    /**
-     * Update jadwal konsultasi.
-     */
     public function update(Request $request, $id)
     {
         $this->validateSchedule($request, $id);
@@ -68,9 +69,6 @@ class ConsultationScheduleController extends Controller
         return redirect()->route('dokter.jadwal-konsultasi.index')->with('success', 'Jadwal konsultasi berhasil diperbarui.');
     }
 
-    /**
-     * Hapus jadwal konsultasi.
-     */
     public function destroy($id)
     {
         $schedule = Appointment::findOrFail($id);
@@ -79,18 +77,12 @@ class ConsultationScheduleController extends Controller
         return redirect()->route('dokter.jadwal-konsultasi.index')->with('success', 'Jadwal konsultasi berhasil dihapus.');
     }
 
-    /**
-     * Tampilkan form untuk pasien membuat janji temu.
-     */
     public function createForPatient()
     {
         $dokters = Doctor::with(['user', 'availabilities'])->get();
         return view('pasien.appointments.create', compact('dokters'));
     }
 
-    /**
-     * Simpan janji temu pasien.
-     */
     public function storeForPatient(Request $request)
     {
         $request->validate([
@@ -104,7 +96,7 @@ class ConsultationScheduleController extends Controller
         }
 
         Appointment::create([
-            'patient_id' => Auth::user()->patient->id,
+            'patient_id' => optional(Auth::user()->patient)->id,
             'doctor_id' => $request->doctor_id,
             'date' => $request->date,
             'time' => $request->time,
@@ -114,9 +106,6 @@ class ConsultationScheduleController extends Controller
         return redirect()->route('pasien.schedule')->with('success', 'Janji temu berhasil dibuat.');
     }
 
-    /**
-     * Validasi jadwal untuk dokter/pasien.
-     */
     protected function validateSchedule(Request $request, $excludeId = null)
     {
         $request->validate([
@@ -149,9 +138,6 @@ class ConsultationScheduleController extends Controller
         }
     }
 
-    /**
-     * Periksa ketersediaan dokter berdasarkan hari dan waktu.
-     */
     protected function isDoctorAvailable($doctorId, $date, $time)
     {
         $dayName = now()->parse($date)->dayName;
@@ -162,51 +148,13 @@ class ConsultationScheduleController extends Controller
             ->exists();
     }
 
-    /**
-     * Simpan feedback dari pasien.
-     */
-    public function storeFeedback(Request $request)
-    {
-        $request->validate([
-            'appointment_id' => 'required|exists:appointments,id',
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string|max:500',
-        ]);
-
-        $appointment = Appointment::findOrFail($request->appointment_id);
-
-        if ($appointment->patient_id !== Auth::user()->patient->id) {
-            return redirect()->back()->withErrors(['error' => 'Anda tidak berhak memberikan feedback untuk janji temu ini.']);
-        }
-
-        if ($appointment->feedback) {
-            $appointment->feedback->update([
-                'rating' => $request->rating,
-                'comment' => $request->comment,
-            ]);
-            return redirect()->route('pasien.records')->with('success', 'Feedback berhasil diperbarui.');
-        }
-
-        Feedback::create([
-            'appointment_id' => $appointment->id,
-            'patient_id' => $appointment->patient_id,
-            'rating' => $request->rating,
-            'comment' => $request->comment,
-        ]);
-
-        return redirect()->route('pasien.records')->with('success', 'Feedback berhasil disimpan.');
-    }
-
-    /**
-     * Update status janji temu.
-     */
     public function updateStatus(Request $request, $id)
     {
         $appointment = Appointment::findOrFail($id);
 
         if (
-            (auth()->user()->role === 'dokter' && $appointment->doctor_id !== auth()->user()->doctor->id) ||
-            (auth()->user()->role === 'pasien' && $appointment->patient_id !== auth()->user()->patient->id)
+            (Auth::user()->role === 'dokter' && $appointment->doctor_id !== Doctor::where('user_id', Auth::id())->value('id')) ||
+            (Auth::user()->role === 'pasien' && $appointment->patient_id !== optional(Auth::user()->patient)->id)
         ) {
             return redirect()->back()->withErrors(['error' => 'Anda tidak memiliki izin untuk mengubah status ini.']);
         }

@@ -13,6 +13,7 @@ use App\Http\Controllers\ConsultationScheduleController;
 use App\Http\Controllers\PatientDetailController;
 use App\Http\Controllers\DoctorProfileController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\RegisterController;
 
 // Halaman utama
 Route::get('/', function () {
@@ -26,8 +27,8 @@ Route::get('/dashboard', function () {
         return match ($role) {
             'admin' => redirect()->route('admin.dashboard'),
             'dokter' => redirect()->route('dokter.dashboard'),
-            'pasien' => redirect()->route('pasien.records'),
-            default => abort(403, 'Unauthorized'),
+            'pasien' => redirect()->route('pasien.dashboard'),
+            default => redirect('/login')->withErrors('Role tidak dikenali. Hubungi admin.'),
         };
     }
     return redirect('/login');
@@ -41,7 +42,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::resource('/admin/users', UserController::class)->names('admin.users');
     Route::resource('/admin/medicines', MedicineController::class)->names('admin.medicines');
-    // Tambahkan rute profil admin jika diperlukan
+
+    // Profil Admin
+    Route::get('/admin/profile', [UserController::class, 'edit'])->name('admin.profile');
+    Route::post('/admin/profile/update', [UserController::class, 'update'])->name('admin.profile.update');
 });
 
 // Grup rute untuk Dokter
@@ -70,7 +74,18 @@ Route::middleware(['auth', 'role:pasien'])->group(function () {
 });
 
 // Route update status untuk dokter dan pasien
-Route::middleware(['auth'])->post('/appointments/{id}/update-status', [ConsultationScheduleController::class, 'updateStatus'])->name('appointments.update-status');
+Route::middleware(['auth'])->group(function () {
+    Route::post('/appointments/{id}/update-status', [ConsultationScheduleController::class, 'updateStatus'])->name('appointments.update-status');
+});
 
 // Logout
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+// Fallback untuk rute tidak ditemukan
+Route::fallback(function () {
+    return response()->view('errors.404', ['message' => 'Halaman tidak ditemukan.'], 404);
+});
+
+// Route untuk registrasi pasien
+Route::get('/register', [RegisterController::class, 'showPatientRegisterForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'registerPatient'])->name('register.store');

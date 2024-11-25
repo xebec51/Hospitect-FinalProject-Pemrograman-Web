@@ -1,59 +1,65 @@
+{{-- D:\GitHub\Hospitect-FinalProject-Pemrograman-Web\hospitect\resources\views\admin\users\edit.blade.php --}}
 @extends('layouts.app')
 
-@section('content')
-<div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Edit Pengguna</h1>
+@section('title', 'Edit Pengguna - Hospitect')
 
-    <form action="{{ route('admin.users.update', $user->id) }}" method="POST" class="space-y-4">
+@section('content')
+<div class="container mx-auto p-6 bg-white rounded shadow">
+    <h2 class="text-2xl font-bold mb-4">Edit Pengguna</h2>
+
+    @if ($errors->any())
+        <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
+            <ul class="list-disc pl-5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
         @csrf
         @method('PUT')
 
-        <div>
+        <!-- Nama -->
+        <div class="mb-4">
             <label for="name" class="block text-sm font-medium text-gray-700">Nama</label>
-            <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}"
-                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+            <input id="name" name="name" type="text" value="{{ old('name', $user->name) }}" class="mt-1 block w-full border-gray-300 rounded shadow-sm" required>
         </div>
 
-        <div>
+        <!-- Email -->
+        <div class="mb-4">
             <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}"
-                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+            <input id="email" name="email" type="email" value="{{ old('email', $user->email) }}" class="mt-1 block w-full border-gray-300 rounded shadow-sm" required>
         </div>
 
-        <div>
+        <!-- Role -->
+        <div class="mb-4">
             <label for="role" class="block text-sm font-medium text-gray-700">Peran</label>
-            <select name="role" id="role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200" onchange="toggleEditRoleFields(this.value)">
-                <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                <option value="dokter" {{ $user->role == 'dokter' ? 'selected' : '' }}>Dokter</option>
-                <option value="pasien" {{ $user->role == 'pasien' ? 'selected' : '' }}>Pasien</option>
+            <select id="role" name="role" class="mt-1 block w-full border-gray-300 rounded shadow-sm" required>
+                <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Admin</option>
+                <option value="dokter" {{ old('role', $user->role) === 'dokter' ? 'selected' : '' }}>Dokter</option>
+                <option value="pasien" {{ old('role', $user->role) === 'pasien' ? 'selected' : '' }}>Pasien</option>
             </select>
         </div>
 
-        <div id="editDokterFields" class="mb-4 {{ $user->role == 'dokter' ? '' : 'hidden' }}">
-            <label for="license_number" class="block text-gray-700">Nomor Lisensi (Dokter)</label>
-            <input type="text" name="license_number" id="license_number" value="{{ old('license_number', $user->dokter->license_number ?? '') }}"
-                   class="w-full p-2 border rounded">
+        <!-- Password -->
+        <div class="mb-4">
+            <label for="password" class="block text-sm font-medium text-gray-700">Password (Opsional)</label>
+            <input id="password" name="password" type="password" class="mt-1 block w-full border-gray-300 rounded shadow-sm">
+            <small class="text-gray-500">Kosongkan jika tidak ingin mengubah password.</small>
         </div>
-        <div id="editPasienFields" class="mb-4 {{ $user->role == 'pasien' ? '' : 'hidden' }}">
-            <label for="insurance_number" class="block text-gray-700">Nomor Asuransi (Pasien)</label>
-            <input type="text" name="insurance_number" id="insurance_number" value="{{ old('insurance_number', $user->pasien->insurance_number ?? '') }}"
-                   class="w-full p-2 border rounded">
+
+        <!-- Konfirmasi Password -->
+        <div class="mb-4">
+            <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Konfirmasi Password</label>
+            <input id="password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full border-gray-300 rounded shadow-sm">
         </div>
 
         <div class="flex justify-end">
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Simpan Perubahan</button>
+            <a href="{{ route('admin.users.index') }}" class="mr-4 text-gray-600 hover:text-gray-900">Batal</a>
+            <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded shadow hover:bg-teal-700">Simpan</button>
         </div>
     </form>
 </div>
-<script>
-    function toggleEditRoleFields(role) {
-        document.getElementById('editDokterFields').classList.add('hidden');
-        document.getElementById('editPasienFields').classList.add('hidden');
-        if (role === 'dokter') {
-            document.getElementById('editDokterFields').classList.remove('hidden');
-        } else if (role === 'pasien') {
-            document.getElementById('editPasienFields').classList.remove('hidden');
-        }
-    }
-</script>
 @endsection
