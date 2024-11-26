@@ -16,52 +16,48 @@
         </div>
     @endif
 
-    <form action="{{ route('dokter.jadwal-konsultasi.update', $schedule->id) }}" method="POST">
+    <form action="{{ route('dokter.appointments.update', $appointment->id) }}" method="POST">
         @csrf
         @method('PUT')
-
         <div class="mb-4">
-            <label for="doctor_id" class="block text-gray-700">Dokter:</label>
+            <label for="doctor_id" class="block">Pilih Dokter:</label>
             <select name="doctor_id" id="doctor_id" class="w-full border-gray-300 rounded p-2" required>
                 <option value="">Pilih Dokter</option>
                 @foreach($dokters as $dokter)
-                    <option value="{{ $dokter->id }}" {{ $dokter->id == $schedule->doctor_id ? 'selected' : '' }}>
+                    <option value="{{ $dokter->id }}" {{ $dokter->id == $appointment->doctor_id ? 'selected' : '' }}>
                         {{ $dokter->user->name }}
                     </option>
                 @endforeach
             </select>
         </div>
-
         <div class="mb-4">
-            <label for="patient_id" class="block text-gray-700">Pasien:</label>
+            <label for="patient_id" class="block">Pasien:</label>
             <select name="patient_id" id="patient_id" class="w-full border-gray-300 rounded p-2" required>
                 <option value="">Pilih Pasien</option>
                 @foreach($pasiens as $pasien)
-                    <option value="{{ $pasien->id }}" {{ $pasien->id == $schedule->patient_id ? 'selected' : '' }}>
+                    <option value="{{ $pasien->id }}" {{ $pasien->id == $appointment->patient_id ? 'selected' : '' }}>
                         {{ $pasien->user->name }}
                     </option>
                 @endforeach
             </select>
         </div>
-
         <div class="mb-4">
-            <label for="date" class="block text-gray-700">Tanggal:</label>
-            <input type="date" name="date" id="date" value="{{ old('date', $schedule->date) }}" class="w-full border-gray-300 rounded p-2" required>
+            <label for="date" class="block">Tanggal:</label>
+            <input type="date" name="date" id="date" class="w-full border-gray-300 rounded p-2" value="{{ $appointment->date }}" required>
         </div>
-
         <div class="mb-4">
-            <label for="time" class="block text-gray-700">Waktu:</label>
-            <input type="time" name="time" id="time" value="{{ old('time', $schedule->time) }}" class="w-full border-gray-300 rounded p-2" required>
+            <label for="time" class="block">Waktu:</label>
+            <select name="time" id="time" class="w-full border-gray-300 rounded p-2" required>
+                @foreach ($timeSlots as $slot)
+                    <option value="{{ $slot }}" {{ $slot == $appointment->time ? 'selected' : '' }}>{{ $slot }}</option>
+                @endforeach
+            </select>
         </div>
-
         <div class="mb-4">
-            <label for="notes" class="block text-gray-700">Catatan:</label>
-            <textarea name="notes" id="notes" rows="4" class="w-full border-gray-300 rounded p-2">{{ old('notes', $schedule->notes) }}</textarea>
+            <label for="notes" class="block">Catatan:</label>
+            <textarea name="notes" id="notes" rows="4" class="w-full border-gray-300 rounded p-2">{{ $appointment->notes }}</textarea>
         </div>
-
-        <div class="flex justify-end">
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Simpan Perubahan</button>
-        </div>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Simpan Perubahan</button>
     </form>
 </div>
 @endsection

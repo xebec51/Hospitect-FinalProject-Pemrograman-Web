@@ -19,6 +19,16 @@ class MedicalRecordsTableSeeder extends Seeder
         $appointments = Appointment::where('status', 'completed')->get();
         $medicines = Medicine::all();
 
+        if ($appointments->isEmpty()) {
+            $this->command->warn('Tidak ada janji konsultasi dengan status "completed" untuk membuat catatan medis.');
+            return;
+        }
+
+        if ($medicines->isEmpty()) {
+            $this->command->warn('Tidak ada data obat untuk ditambahkan ke catatan medis.');
+            return;
+        }
+
         foreach ($appointments as $appointment) {
             // Buat catatan medis berdasarkan janji konsultasi
             $record = MedicalRecord::create([
@@ -30,7 +40,7 @@ class MedicalRecordsTableSeeder extends Seeder
             ]);
 
             // Tambahkan obat ke catatan medis (maks 3 obat per catatan)
-            $assignedMedicines = $medicines->random(rand(1, 3));
+            $assignedMedicines = $medicines->random(rand(1, min(3, $medicines->count())));
             foreach ($assignedMedicines as $medicine) {
                 $record->medicines()->attach($medicine->id, [
                     'dosage' => rand(1, 3) . ' kali sehari',
@@ -38,5 +48,7 @@ class MedicalRecordsTableSeeder extends Seeder
                 ]);
             }
         }
+
+        $this->command->info('Seeder untuk catatan medis berhasil dijalankan.');
     }
 }

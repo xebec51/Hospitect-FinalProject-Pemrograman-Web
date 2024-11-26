@@ -63,16 +63,14 @@
                             @break
                         @case('dokter')
                             <li><a href="{{ route('dokter.dashboard') }}" class="sidebar-link {{ request()->routeIs('dokter.dashboard') ? 'active' : '' }}">Dashboard Dokter</a></li>
-                            <li><a href="{{ route('dokter.schedule') }}" class="sidebar-link {{ request()->routeIs('dokter.schedule') ? 'active' : '' }}">Jadwal Konsultasi</a></li>
+                            <li><a href="{{ route('dokter.appointments.index') }}" class="sidebar-link {{ request()->routeIs('dokter.appointments.*') ? 'active' : '' }}">Jadwal Konsultasi</a></li>
                             <li><a href="{{ route('dokter.medical-records.index') }}" class="sidebar-link {{ request()->routeIs('dokter.medical-records.*') ? 'active' : '' }}">Rekam Medis</a></li>
-                            <li><a href="{{ route('dokter.jadwal-konsultasi.index') }}" class="sidebar-link {{ request()->routeIs('dokter.jadwal-konsultasi.*') ? 'active' : '' }}">Kelola Jadwal</a></li>
                             <li><a href="{{ route('dokter.feedback') }}" class="sidebar-link {{ request()->routeIs('dokter.feedback') ? 'active' : '' }}">Feedback</a></li>
                             @break
                         @case('pasien')
                             <li><a href="{{ route('pasien.dashboard') }}" class="sidebar-link {{ request()->routeIs('pasien.dashboard') ? 'active' : '' }}">Dashboard Pasien</a></li>
-                            <li><a href="{{ route('pasien.schedule') }}" class="sidebar-link {{ request()->routeIs('pasien.schedule') ? 'active' : '' }}">Jadwal Konsultasi Saya</a></li>
+                            <li><a href="{{ route('pasien.appointments.index') }}" class="sidebar-link {{ request()->routeIs('pasien.appointments.*') ? 'active' : '' }}">Jadwal Konsultasi</a></li>
                             <li><a href="{{ route('pasien.records') }}" class="sidebar-link {{ request()->routeIs('pasien.records') ? 'active' : '' }}">Rekam Medis Saya</a></li>
-                            <li><a href="{{ route('pasien.appointment.create') }}" class="sidebar-link {{ request()->routeIs('pasien.appointment.create') ? 'active' : '' }}">Buat Janji Temu</a></li>
                             @break
                         @default
                             <li><span class="block p-2 text-gray-400">Role tidak dikenal</span></li>
@@ -137,8 +135,11 @@
                 });
             });
 
-            window.addEventListener('pageshow', () => {
-                if (loader) loader.classList.remove('show');
+            // Ensure loader hides when navigating back
+            window.addEventListener('pageshow', (event) => {
+                if (event.persisted && loader) {
+                    loader.classList.remove('show');
+                }
             });
 
             loader.classList.remove('show');

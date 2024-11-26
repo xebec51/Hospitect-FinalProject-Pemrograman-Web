@@ -16,7 +16,7 @@
         </div>
     @endif
 
-    <form action="{{ route('dokter.jadwal-konsultasi.store') }}" method="POST">
+    <form action="{{ route('dokter.appointments.store') }}" method="POST">
         @csrf
         <div class="mb-4">
             <label for="doctor_id" class="block text-gray-700">Dokter:</label>
@@ -45,17 +45,15 @@
 
         <div class="mb-4">
             <label for="time" class="block text-gray-700">Waktu:</label>
-            <input type="time" name="time" id="time" value="{{ old('time') }}" class="w-full border-gray-300 rounded p-2" required>
+            <select name="time" id="time" class="w-full border-gray-300 rounded p-2" required>
+                <option value="">Pilih Waktu</option>
+                @foreach($timeSlots as $slot)
+                    <option value="{{ $slot }}">{{ $slot }}</option>
+                @endforeach
+            </select>
         </div>
 
-        <div class="mb-4">
-            <label for="notes" class="block text-gray-700">Catatan:</label>
-            <textarea name="notes" id="notes" rows="4" class="w-full border-gray-300 rounded p-2">{{ old('notes') }}</textarea>
-        </div>
-
-        <div class="flex justify-end">
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Simpan</button>
-        </div>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Simpan</button>
     </form>
 </div>
 @endsection

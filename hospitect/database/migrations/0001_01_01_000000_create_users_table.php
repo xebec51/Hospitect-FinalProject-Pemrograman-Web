@@ -11,8 +11,10 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('password'); // Tambahan kolom password
+            $table->timestamp('email_verified_at')->nullable(); // Tambahkan kolom email_verified_at
+            $table->string('password');
             $table->enum('role', ['admin', 'dokter', 'pasien']);
+            $table->rememberToken(); // Tambahkan kolom remember_token jika fitur "remember me" digunakan
             $table->timestamps();
         });
     }

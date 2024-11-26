@@ -10,10 +10,19 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role'];
+    /**
+     * Atribut yang dapat diisi melalui mass assignment.
+     */
+    protected $fillable = ['name', 'email', 'password', 'role', 'email_verified_at'];
 
+    /**
+     * Atribut yang disembunyikan saat serialisasi.
+     */
     protected $hidden = ['password', 'remember_token'];
 
+    /**
+     * Tipe atribut yang harus dikonversi.
+     */
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
