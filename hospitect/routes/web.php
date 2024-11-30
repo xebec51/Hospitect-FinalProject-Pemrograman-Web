@@ -37,8 +37,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
     Route::resource('/users', UserController::class)->names('users');
     Route::resource('/medicines', MedicineController::class)->names('medicines');
-    Route::get('/profile', [UserController::class, 'edit'])->name('profile');
-    Route::post('/profile/update', [UserController::class, 'update'])->name('profile.update');
 });
 
 // Grup rute untuk Dokter
@@ -49,8 +47,6 @@ Route::middleware(['auth', 'role:dokter'])->prefix('dokter')->name('dokter.')->g
     Route::get('/profile', [DoctorProfileController::class, 'edit'])->name('profile');
     Route::post('/profile/update', [DoctorProfileController::class, 'update'])->name('profile.update');
     Route::get('/feedback', [FeedbackController::class, 'indexForDoctor'])->name('feedback');
-
-    // Rute untuk dokter memperbarui status janji temu
     Route::post('/appointments/{id}/update-status', [ConsultationScheduleController::class, 'updateStatus'])->name('appointments.update-status');
 });
 
@@ -58,14 +54,15 @@ Route::middleware(['auth', 'role:dokter'])->prefix('dokter')->name('dokter.')->g
 Route::middleware(['auth', 'role:pasien'])->prefix('pasien')->name('pasien.')->group(function () {
     Route::get('/dashboard', [PasienController::class, 'index'])->name('dashboard');
     Route::resource('/appointments', ConsultationScheduleController::class)->names('appointments');
-    Route::get('/medical-records', [PasienController::class, 'showRecords'])->name('records');
+    Route::get('/medical-records', [PasienController::class, 'showRecords'])->name('records.index');
     Route::get('/profile', [PatientDetailController::class, 'edit'])->name('profile');
     Route::post('/profile/update', [PatientDetailController::class, 'update'])->name('profile.update');
     Route::post('/profile/delete', [PatientDetailController::class, 'destroy'])->name('profile.delete');
 
-    // Rute untuk fitur feedback
+    // Rute Feedback untuk Pasien
     Route::post('/feedback/store', [FeedbackController::class, 'store'])->name('feedback.store');
-    Route::post('/feedback/update/{feedback}', [FeedbackController::class, 'update'])->name('feedback.update');
+    Route::get('/feedback/edit/{feedback}', [FeedbackController::class, 'edit'])->name('feedback.edit');
+    Route::put('/feedback/update/{feedback}', [FeedbackController::class, 'update'])->name('feedback.update');
 });
 
 // Logout

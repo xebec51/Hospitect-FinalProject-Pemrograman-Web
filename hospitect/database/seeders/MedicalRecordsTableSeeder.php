@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\MedicalRecord;
 use App\Models\Appointment;
 use App\Models\Medicine;
+use Carbon\Carbon;
 
 class MedicalRecordsTableSeeder extends Seeder
 {
@@ -36,7 +37,8 @@ class MedicalRecordsTableSeeder extends Seeder
                 'doctor_id' => $appointment->doctor_id,
                 'diagnosis' => 'Diagnosa untuk pasien ' . $appointment->patient_id,
                 'treatment' => 'Pengobatan untuk pasien ' . $appointment->patient_id,
-                'record_date' => now()->subDays(rand(1, 30)), // Tanggal catatan
+                // Gunakan waktu dengan 'now' dan tambahkan waktu acak untuk catatan medis
+                'record_date' => Carbon::now()->subDays(rand(1, 30))->setTime(rand(7, 17), rand(0, 59), 0),
             ]);
 
             // Tambahkan obat ke catatan medis (maks 3 obat per catatan)

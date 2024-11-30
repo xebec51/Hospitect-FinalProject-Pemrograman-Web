@@ -10,16 +10,47 @@ use Illuminate\Support\Facades\Auth;
 
 class ConsultationScheduleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = Appointment::with(['doctor.user', 'patient.user'])
+        // Ambil semua appointment pasien yang sedang login
+        $appointmentsQuery = Appointment::with(['doctor.user', 'patient.user'])
             ->when(Auth::user()->role === 'pasien', function ($query) {
                 $query->where('patient_id', Auth::user()->patient->id ?? null);
             })
             ->when(Auth::user()->role === 'dokter', function ($query) {
                 $query->where('doctor_id', Doctor::where('user_id', Auth::id())->value('id'));
-            })
-            ->get();
+            });
+
+        // Fitur Pencarian
+        if ($request->has('search') && $request->search != '') {
+            $appointmentsQuery->where(function($query) use ($request) {
+                $query->whereDate('date', 'like', '%'.$request->search.'%')
+                    ->orWhere('time', 'like', '%'.$request->search.'%')
+                    ->orWhereHas('doctor', function ($query) use ($request) {
+                        $query->where('name', 'like', '%'.$request->search.'%');
+                    });
+            });
+        }
+
+        // Fitur Sorting
+        if ($request->has('sort_by')) {
+            $sortBy = $request->get('sort_by');
+            $sortOrder = $request->get('sort_order', 'asc');
+
+            switch ($sortBy) {
+                case 'date':
+                    $appointmentsQuery->orderBy('date', $sortOrder);
+                    break;
+                case 'status':
+                    $appointmentsQuery->orderBy('status', $sortOrder);
+                    break;
+                default:
+                    $appointmentsQuery->orderBy('date', 'asc'); // Default sorting
+            }
+        }
+
+        // Ambil data appointment setelah pencarian dan sorting
+        $appointments = $appointmentsQuery->get();
 
         $view = Auth::user()->role === 'pasien' ? 'pasien.appointments.index' : 'dokter.appointments.index';
 

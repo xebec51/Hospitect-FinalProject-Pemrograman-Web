@@ -8,10 +8,20 @@ use Illuminate\Support\Facades\Storage;
 
 class MedicineController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $medicines = Medicine::all();
-        return view('admin.medicines.index', compact('medicines'));
+        // Ambil query pencarian nama dan parameter sorting
+        $search = $request->get('search', ''); // Default pencarian kosong
+        $sortBy = $request->get('sortBy', 'name'); // Default sorting berdasarkan nama
+        $sortDirection = $request->get('sortDirection', 'asc'); // Default urutkan secara ascending
+
+        // Filter dan sorting berdasarkan input
+        $medicines = Medicine::query()
+            ->where('name', 'like', '%' . $search . '%') // Filter berdasarkan nama obat
+            ->orderBy($sortBy, $sortDirection)
+            ->get();
+
+        return view('admin.medicines.index', compact('medicines', 'search', 'sortBy', 'sortDirection'));
     }
 
     public function create()

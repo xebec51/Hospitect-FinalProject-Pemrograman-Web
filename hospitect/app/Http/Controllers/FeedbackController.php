@@ -4,71 +4,85 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Feedback;
-use App\Models\Appointment;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class FeedbackController extends Controller
 {
     /**
-     * Tampilkan formulir untuk membuat feedback.
+     * Tampilkan formulir untuk mengedit feedback.
      */
-    public function create()
+    public function edit($id)
     {
-        $appointments = Appointment::where('patient_id', Auth::user()->patient->id)
-            ->where('status', 'completed') // Hanya janji temu yang sudah selesai
-            ->where('date', '>=', Carbon::now()->subDays(3)) // Hanya janji temu dalam 3 hari terakhir
-            ->with('doctor.user') // Ambil data dokter dan user terkait
-            ->get();
+        // Mengambil feedback berdasarkan ID dan ID pasien yang sedang login
+        $feedback = Feedback::where('id', $id)
+            ->where('patient_id', Auth::user()->patient->id)
+            ->first();
 
-        return view('pasien.feedback.create', compact('appointments'));
+        // Jika feedback tidak ditemukan, arahkan kembali dengan pesan error
+        if (!$feedback) {
+            return redirect()->route('pasien.records.index')->with('error', 'Feedback tidak ditemukan.');
+        }
+
+        return view('pasien.feedback.edit', compact('feedback'));
     }
 
     /**
-     * Simpan feedback yang dibuat oleh pasien.
+     * Simpan feedback yang diperbarui oleh pasien.
      */
-    public function store(Request $request)
+    public function update(Request $request, $id)
     {
+        // Validasi input dari formulir
         $request->validate([
-            'appointment_id' => 'required|exists:appointments,id',
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string|max:500',
+            'rating' => 'required|integer|min:1|max:5', // Rating harus integer antara 1 hingga 5
+            'comment' => 'nullable|string|max:500', // Komentar optional, dengan batasan panjang
         ]);
 
-        // Periksa apakah janji temu valid dan milik pasien
-        $appointment = Appointment::where('id', $request->appointment_id)
+        // Menemukan feedback berdasarkan ID dan ID pasien yang sedang login
+        $feedback = Feedback::where('id', $id)
             ->where('patient_id', Auth::user()->patient->id)
-            ->where('status', 'completed')
-            ->where('date', '>=', Carbon::now()->subDays(3)) // Hanya janji temu dalam 3 hari terakhir
             ->first();
 
-        if (!$appointment) {
-            return redirect()->back()->withErrors(['error' => 'Akses tidak diizinkan atau janji temu tidak valid.']);
+        // Jika feedback tidak ditemukan, arahkan kembali dengan pesan error
+        if (!$feedback) {
+            return redirect()->route('pasien.records.index')->with('error', 'Feedback tidak ditemukan.');
         }
 
-        // Simpan data feedback ke database
-        Feedback::create([
-            'appointment_id' => $appointment->id,
-            'patient_id' => Auth::user()->patient->id,
+        // Memperbarui feedback
+        $feedback->update([
             'rating' => $request->rating,
             'comment' => $request->comment,
         ]);
 
-        return redirect()->route('pasien.schedule')->with('success', 'Feedback berhasil dikirim.');
+        // Redirect kembali ke halaman medical records dengan pesan sukses
+        return redirect()->route('pasien.records.index')->with('success', 'Feedback berhasil diperbarui.');
     }
 
     /**
-     * Dokter melihat semua feedback.
+     * Tampilkan feedback untuk dokter.
      */
     public function indexForDoctor()
     {
-        $doctorId = Auth::user()->doctor->id; // Ambil ID dokter saat ini
+        // Pastikan pengguna yang sedang login adalah dokter
+        $doctorId = Auth::user()->doctor->id;
 
-        // Cari feedback yang relevan dengan dokter ini
+        // Ambil feedback yang terkait dengan jadwal konsultasi untuk dokter tertentu
         $feedbacks = Feedback::whereHas('appointment', function ($query) use ($doctorId) {
             $query->where('doctor_id', $doctorId);
-        })->with('appointment.patient.user') // Ambil data pasien dan user terkait
-          ->get();
+        })
+        ->with('appointment.patient.user') // Memuat data pasien yang berhubungan
+        ->get();
+
+        // Jika tidak ada feedback ditemukan, beri tahu dokter
+        if ($feedbacks->isEmpty()) {
+            return redirect()->route('dokter.dashboard')->with('info', 'Belum ada feedback untuk Anda.');
+        }
+
+        // Format tanggal pada setiap feedback menggunakan Carbon
+        $feedbacks = $feedbacks->map(function ($feedback) {
+            $feedback->appointment->formatted_date = Carbon::parse($feedback->appointment->date)->format('d/m/Y H:i');
+            return $feedback;
+        });
 
         return view('dokter.feedbacks.index', compact('feedbacks'));
     }

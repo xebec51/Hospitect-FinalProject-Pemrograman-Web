@@ -18,10 +18,20 @@ class UserController extends Controller
         $this->middleware('role:admin');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
-        return view('admin.users.index', compact('users'));
+        // Ambil query pencarian nama dan parameter sorting
+        $search = $request->get('search', ''); // Default pencarian kosong
+        $sortBy = $request->get('sortBy', 'name'); // Default sorting berdasarkan nama
+        $sortDirection = $request->get('sortDirection', 'asc'); // Default urutkan secara ascending
+
+        // Filter dan sorting berdasarkan input
+        $users = User::query()
+            ->where('name', 'like', '%' . $search . '%') // Filter berdasarkan nama
+            ->orderBy($sortBy, $sortDirection)
+            ->get();
+
+        return view('admin.users.index', compact('users', 'search', 'sortBy', 'sortDirection'));
     }
 
     public function create()

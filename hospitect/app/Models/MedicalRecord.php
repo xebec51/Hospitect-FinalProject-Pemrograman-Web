@@ -40,4 +40,3 @@ class MedicalRecord extends Model
                     ->withPivot('dosage', 'instructions');
     }
 }
-?>

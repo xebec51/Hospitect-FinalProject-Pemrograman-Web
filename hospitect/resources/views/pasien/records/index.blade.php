@@ -12,49 +12,64 @@
         </div>
     @endif
 
-    <table class="min-w-full bg-white border border-gray-200">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="py-2 px-4 border-b">Tanggal</th>
-                <th class="py-2 px-4 border-b">Dokter</th>
-                <th class="py-2 px-4 border-b">Catatan</th>
-                <th class="py-2 px-4 border-b">Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($appointments as $appointment)
-                <tr>
-                    <td class="py-2 px-4 border-b">{{ $appointment->date }}</td>
-                    <td class="py-2 px-4 border-b">{{ $appointment->doctor->user->name }}</td>
-                    <td class="py-2 px-4 border-b">{{ $appointment->notes }}</td>
-                    <td class="py-2 px-4 border-b">
-                        @if ($appointment->status == 'completed' && $appointment->date >= \Carbon\Carbon::now()->subDays(3))
-                            <form action="{{ route('pasien.feedback.store') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="appointment_id" value="{{ $appointment->id }}">
-                                <div class="mb-2">
-                                    <label for="rating" class="block text-sm font-medium text-gray-700">Rating</label>
-                                    <select name="rating" id="rating" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm">
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                    </select>
-                                </div>
-                                <div class="mb-2">
-                                    <label for="comment" class="block text-sm font-medium text-gray-700">Komentar</label>
-                                    <textarea name="comment" id="comment" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"></textarea>
-                                </div>
-                                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Kirim Feedback</button>
-                            </form>
-                        @else
-                            <span class="text-gray-500">Tidak dapat memberikan feedback</span>
-                        @endif
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
+    <!-- Pencarian -->
+    <form method="GET" action="{{ route('pasien.records.index') }}" class="mb-4">
+        <div class="flex items-center">
+            <input type="text" name="search" class="px-4 py-2 border border-gray-300 rounded w-full md:w-1/3" placeholder="Cari rekam medis..." value="{{ request()->get('search') }}">
+            <button type="submit" class="ml-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Cari
+            </button>
+        </div>
+    </form>
+
+    @if ($medicalRecords->isEmpty())
+        <p class="text-gray-500">Tidak ada rekam medis yang ditemukan.</p>
+    @else
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="border border-gray-200 p-2 text-left">
+                            <a href="{{ route('pasien.records.index', ['sort' => 'record_date', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc', 'search' => request('search')]) }}" class="flex items-center">
+                                Tanggal
+                                <i class="ml-2 fas fa-sort{{ request('sort') == 'record_date' ? (request('direction') == 'asc' ? '-up' : '-down') : '' }}"></i>
+                            </a>
+                        </th>
+                        <th class="border border-gray-200 p-2 text-left">
+                            <a href="{{ route('pasien.records.index', ['sort' => 'doctor_name', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc', 'search' => request('search')]) }}" class="flex items-center">
+                                Dokter
+                                <i class="ml-2 fas fa-sort{{ request('sort') == 'doctor_name' ? (request('direction') == 'asc' ? '-up' : '-down') : '' }}"></i>
+                            </a>
+                        </th>
+                        <th class="border border-gray-200 p-2 text-left">Diagnosis</th>
+                        <th class="border border-gray-200 p-2 text-left">Tindakan</th>
+                        <th class="border border-gray-200 p-2 text-left">Obat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($medicalRecords as $record)
+                        <tr class="hover:bg-gray-50">
+                            <td class="border border-gray-200 p-2">{{ $record->record_date->format('d/m/Y') }}</td>
+                            <td class="border border-gray-200 p-2">{{ $record->doctor->user->name }}</td>
+                            <td class="border border-gray-200 p-2">{{ $record->diagnosis }}</td>
+                            <td class="border border-gray-200 p-2">{{ $record->treatment ?? 'Tidak ada tindakan' }}</td>
+                            <td class="border border-gray-200 p-2">
+                                @if($record->medicines->isEmpty())
+                                    Tidak ada obat
+                                @else
+                                    {{ $record->medicines->pluck('name')->implode(', ') }}
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4">
+            {{ $medicalRecords->links() }}
+        </div>
+    @endif
 </div>
 @endsection

@@ -13,13 +13,63 @@
         </div>
     @endif
 
+    <!-- Pencarian dan Sorting -->
+    <div class="mb-4 flex space-x-4">
+        <form action="{{ route('admin.users.index') }}" method="GET" class="flex space-x-4">
+            <input type="text" name="search" value="{{ $search }}" placeholder="Cari Nama..." class="border p-2 rounded">
+            <select name="sortBy" class="border p-2 rounded">
+                <option value="name" {{ $sortBy == 'name' ? 'selected' : '' }}>Nama</option>
+                <option value="email" {{ $sortBy == 'email' ? 'selected' : '' }}>Email</option>
+                <option value="role" {{ $sortBy == 'role' ? 'selected' : '' }}>Peran</option>
+            </select>
+            <select name="sortDirection" class="border p-2 rounded">
+                <option value="asc" {{ $sortDirection == 'asc' ? 'selected' : '' }}>Ascending</option>
+                <option value="desc" {{ $sortDirection == 'desc' ? 'selected' : '' }}>Descending</option>
+            </select>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Terapkan</button>
+        </form>
+    </div>
+
     <div class="overflow-x-auto">
         <table class="min-w-full bg-white border border-gray-300">
             <thead class="bg-gray-100">
                 <tr>
-                    <th class="py-2 px-4 border-b-2 border-gray-300 text-left">Nama</th>
-                    <th class="py-2 px-4 border-b-2 border-gray-300 text-left">Email</th>
-                    <th class="py-2 px-4 border-b-2 border-gray-300 text-left">Peran</th>
+                    <th class="py-2 px-4 border-b-2 border-gray-300 text-left">
+                        <a href="{{ route('admin.users.index', ['search' => $search, 'sortBy' => 'name', 'sortDirection' => $sortDirection == 'asc' ? 'desc' : 'asc']) }}">
+                            Nama
+                            @if($sortBy == 'name')
+                                @if($sortDirection == 'asc')
+                                    &darr;
+                                @else
+                                    &uarr;
+                                @endif
+                            @endif
+                        </a>
+                    </th>
+                    <th class="py-2 px-4 border-b-2 border-gray-300 text-left">
+                        <a href="{{ route('admin.users.index', ['search' => $search, 'sortBy' => 'email', 'sortDirection' => $sortDirection == 'asc' ? 'desc' : 'asc']) }}">
+                            Email
+                            @if($sortBy == 'email')
+                                @if($sortDirection == 'asc')
+                                    &darr;
+                                @else
+                                    &uarr;
+                                @endif
+                            @endif
+                        </a>
+                    </th>
+                    <th class="py-2 px-4 border-b-2 border-gray-300 text-left">
+                        <a href="{{ route('admin.users.index', ['search' => $search, 'sortBy' => 'role', 'sortDirection' => $sortDirection == 'asc' ? 'desc' : 'asc']) }}">
+                            Peran
+                            @if($sortBy == 'role')
+                                @if($sortDirection == 'asc')
+                                    &darr;
+                                @else
+                                    &uarr;
+                                @endif
+                            @endif
+                        </a>
+                    </th>
                     <th class="py-2 px-4 border-b-2 border-gray-300 text-left">Aksi</th>
                 </tr>
             </thead>

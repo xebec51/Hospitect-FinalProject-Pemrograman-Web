@@ -35,7 +35,7 @@
             <h2 class="text-xl font-semibold mb-4">Informasi Pribadi</h2>
             <div class="mb-4">
                 <label for="phone" class="block font-bold mb-2">Nomor Telepon</label>
-                <input type="text" id="phone" name="phone" value="{{ old('phone', $patientDetails->phone ?? '') }}" class="w-full border border-gray-300 p-2 rounded">
+                <input type="text" id="phone" name="phone" value="{{ old('phone', $patientDetails->phone ?? '') }}" class="w-full border border-gray-300 p-2 rounded" pattern="^\+?[0-9]{10,15}$" title="Nomor telepon harus terdiri dari angka, dan dapat dimulai dengan tanda '+' (misalnya +628123456789)">
                 @error('phone')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -43,7 +43,7 @@
 
             <div class="mb-4">
                 <label for="date_of_birth" class="block font-bold mb-2">Tanggal Lahir</label>
-                <input type="date" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth', $patientDetails->date_of_birth ?? '') }}" class="w-full border border-gray-300 p-2 rounded">
+                <input type="date" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth', $patientDetails->date_of_birth ?? '') }}" class="w-full border border-gray-300 p-2 rounded" max="{{ now()->subYears(12)->toDateString() }}">
                 @error('date_of_birth')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -81,6 +81,7 @@
 </div>
 
 <script>
+    // Script untuk memanipulasi tampilan profil
     document.getElementById('edit-profile-btn').addEventListener('click', function () {
         document.getElementById('profile-view').style.display = 'none';
         document.getElementById('profile-edit').style.display = 'block';

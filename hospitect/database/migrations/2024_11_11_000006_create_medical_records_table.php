@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->foreignId('doctor_id')->constrained('doctors')->onDelete('cascade');
             $table->string('diagnosis');
             $table->string('treatment');
-            $table->date('record_date'); // Tanggal catatan medis
+            $table->dateTime('record_date'); // Ubah tipe kolom menjadi DATETIME
             $table->timestamps();
         });
     }
