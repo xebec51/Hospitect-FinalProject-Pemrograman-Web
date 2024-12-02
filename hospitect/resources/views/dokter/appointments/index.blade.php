@@ -5,15 +5,15 @@
 @section('content')
 <div class="container mx-auto p-4">
     <div class="flex justify-between items-center mb-4">
-        <h1 class="text-2xl font-bold">Jadwal Konsultasi</h1>
-        <a href="{{ route('dokter.appointments.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Tambah Jadwal Konsultasi
+        <h1 class="text-2xl font-bold"><i class="fas fa-calendar-alt mr-2"></i>Jadwal Konsultasi</h1>
+        <a href="{{ route('dokter.appointments.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center">
+            <i class="fas fa-plus mr-2"></i> Tambah Jadwal Konsultasi
         </a>
     </div>
 
     @if (session('success'))
         <div class="bg-green-500 text-white p-2 rounded mb-4">
-            {{ session('success') }}
+            <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
         </div>
     @endif
 
@@ -23,11 +23,11 @@
         <table class="min-w-full bg-white border border-gray-200">
             <thead class="bg-gray-100">
                 <tr>
-                    <th class="border border-gray-200 p-2 text-left">Tanggal</th>
-                    <th class="border border-gray-200 p-2 text-left">Waktu</th>
-                    <th class="border border-gray-200 p-2 text-left">Pasien</th>
-                    <th class="border border-gray-200 p-2 text-left">Status</th>
-                    <th class="border border-gray-200 p-2 text-left">Aksi</th>
+                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-calendar-day mr-2"></i>Tanggal</th>
+                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-clock mr-2"></i>Waktu</th>
+                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-user mr-2"></i>Pasien</th>
+                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-info-circle mr-2"></i>Status</th>
+                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-cogs mr-2"></i>Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,11 +47,15 @@
                             </form>
                         </td>
                         <td class="border border-gray-200 p-2">
-                            <a href="{{ route('dokter.appointments.edit', $appointment->id) }}" class="text-blue-600 hover:underline">Edit</a>
+                            <a href="{{ route('dokter.appointments.edit', $appointment->id) }}" class="text-blue-600 hover:underline flex items-center">
+                                <i class="fas fa-edit mr-1"></i> Edit
+                            </a>
                             <form action="{{ route('dokter.appointments.destroy', $appointment->id) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Apakah Anda yakin ingin menghapus?')">Hapus</button>
+                                <button type="submit" class="text-red-600 hover:underline flex items-center" onclick="return confirm('Apakah Anda yakin ingin menghapus?')">
+                                    <i class="fas fa-trash mr-1"></i> Hapus
+                                </button>
                             </form>
                         </td>
                     </tr>

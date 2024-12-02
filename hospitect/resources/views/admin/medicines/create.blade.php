@@ -2,13 +2,13 @@
 
 @section('content')
 <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Tambah Obat Baru</h1>
+    <h1 class="text-2xl font-bold mb-4"><i class="fas fa-pills"></i> Tambah Obat Baru</h1>
 
-    <form action="{{ route('admin.medicines.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+    <form action="{{ route('admin.medicines.store') }}" method="POST" class="space-y-4">
         @csrf
 
         <div>
-            <label for="name" class="block text-sm font-medium text-gray-700">Nama Obat</label>
+            <label for="name" class="block text-sm font-medium text-gray-700"><i class="fas fa-capsules"></i> Nama Obat</label>
             <input type="text" name="name" id="name" value="{{ old('name') }}"
                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200" required>
         </div>
@@ -21,8 +21,10 @@
         <div>
             <label for="type" class="block text-sm font-medium text-gray-700">Jenis Obat</label>
             <select name="type" id="type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200" required>
-                <option value="biasa" {{ old('type') == 'biasa' ? 'selected' : '' }}>Biasa</option>
-                <option value="keras" {{ old('type') == 'keras' ? 'selected' : '' }}>Keras</option>
+                <option value="Tablet" {{ old('type') == 'Tablet' ? 'selected' : '' }}>Tablet</option>
+                <option value="Kapsul" {{ old('type') == 'Kapsul' ? 'selected' : '' }}>Kapsul</option>
+                <option value="Sirup" {{ old('type') == 'Sirup' ? 'selected' : '' }}>Sirup</option>
+                <option value="Injeksi" {{ old('type') == 'Injeksi' ? 'selected' : '' }}>Injeksi</option>
             </select>
         </div>
 
@@ -32,13 +34,7 @@
                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200" required>
         </div>
 
-        <div>
-            <label for="image" class="block text-sm font-medium text-gray-700">Gambar Obat</label>
-            <input type="file" name="image" id="image"
-                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200">
-        </div>
-
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Simpan</button>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"><i class="fas fa-save"></i> Simpan</button>
     </form>
 </div>
 @endsection

@@ -3,13 +3,15 @@
 @section('content')
 <div class="container mx-auto p-4">
     <div class="flex justify-between items-center mb-4">
-        <h1 class="text-2xl font-bold">Catatan Medis</h1>
-        <a href="{{ route('dokter.medical-records.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Tambah Catatan Medis</a>
+        <h1 class="text-2xl font-bold"><i class="fas fa-notes-medical mr-2"></i>Catatan Medis</h1>
+        <a href="{{ route('dokter.medical-records.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center">
+            <i class="fas fa-plus mr-2"></i> Tambah Catatan Medis
+        </a>
     </div>
 
     @if (session('success'))
         <div class="bg-green-500 text-white p-2 rounded mb-4">
-            {{ session('success') }}
+            <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
         </div>
     @endif
 
@@ -17,12 +19,12 @@
         <table class="min-w-full bg-white border border-gray-200">
             <thead class="bg-gray-100">
                 <tr>
-                    <th class="border border-gray-200 p-2 text-left">Nama Pasien</th>
-                    <th class="border border-gray-200 p-2 text-left">Diagnosis</th>
-                    <th class="border border-gray-200 p-2 text-left">Tanggal Periksa</th>
-                    <th class="border border-gray-200 p-2 text-left">Tindakan</th>
-                    <th class="border border-gray-200 p-2 text-left">Obat</th>
-                    <th class="border border-gray-200 p-2 text-left">Aksi</th>
+                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-user mr-2"></i>Nama Pasien</th>
+                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-diagnoses mr-2"></i>Diagnosis</th>
+                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-calendar-alt mr-2"></i>Tanggal Periksa</th>
+                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-procedures mr-2"></i>Tindakan</th>
+                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-pills mr-2"></i>Obat</th>
+                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-cogs mr-2"></i>Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,11 +49,15 @@
                             @endif
                         </td>
                         <td class="border border-gray-200 p-2 flex space-x-2">
-                            <a href="{{ route('dokter.medical-records.edit', $record->id) }}" class="text-blue-600 hover:underline">Edit</a>
+                            <a href="{{ route('dokter.medical-records.edit', $record->id) }}" class="text-blue-600 hover:underline flex items-center">
+                                <i class="fas fa-edit mr-1"></i> Edit
+                            </a>
                             <form action="{{ route('dokter.medical-records.destroy', $record->id) }}" method="POST" style="display: inline;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Apakah Anda yakin ingin menghapus?')">Hapus</button>
+                                <button type="submit" class="text-red-600 hover:underline flex items-center" onclick="return confirm('Apakah Anda yakin ingin menghapus?')">
+                                    <i class="fas fa-trash mr-1"></i> Hapus
+                                </button>
                             </form>
                         </td>
                     </tr>

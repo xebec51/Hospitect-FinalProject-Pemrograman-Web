@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="container mx-auto p-6 bg-white rounded shadow">
-    <h2 class="text-2xl font-bold mb-4">Edit Pengguna</h2>
+    <h2 class="text-2xl font-bold mb-4"><i class="fas fa-user-edit"></i> Edit Pengguna</h2>
 
     @if ($errors->any())
         <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
@@ -23,7 +23,7 @@
 
         <!-- Nama -->
         <div class="mb-4">
-            <label for="name" class="block text-sm font-medium text-gray-700">Nama</label>
+            <label for="name" class="block text-sm font-medium text-gray-700"><i class="fas fa-user"></i> Nama</label>
             <input id="name" name="name" type="text" value="{{ old('name', $user->name) }}" class="mt-1 block w-full border-gray-300 rounded shadow-sm" required>
         </div>
 
@@ -57,8 +57,8 @@
         </div>
 
         <div class="flex justify-end">
-            <a href="{{ route('admin.users.index') }}" class="mr-4 text-gray-600 hover:text-gray-900">Batal</a>
-            <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded shadow hover:bg-teal-700">Simpan</button>
+            <a href="{{ route('admin.users.index') }}" class="mr-4 text-gray-600 hover:text-gray-900"><i class="fas fa-times"></i> Batal</a>
+            <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded shadow hover:bg-teal-700"><i class="fas fa-save"></i> Simpan</button>
         </div>
     </form>
 </div>

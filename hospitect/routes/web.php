@@ -37,6 +37,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
     Route::resource('/users', UserController::class)->names('users');
     Route::resource('/medicines', MedicineController::class)->names('medicines');
+    Route::resource('/medical-records', MedicalRecordController::class)->names('medical-records');
+    Route::resource('/appointments', ConsultationScheduleController::class)->names('appointments');
 });
 
 // Grup rute untuk Dokter

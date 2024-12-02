@@ -6,7 +6,7 @@
 <div class="container mx-auto p-4">
     <h1 class="text-2xl font-bold mb-4">Edit Feedback</h1>
 
-    <form action="{{ route('pasien.feedback.update', $feedback->id) }}" method="POST">
+    <form action="{{ route('pasien.feedback.update', $feedback->id) }}" method="POST" class="bg-white shadow-md rounded p-4">
         @csrf
         @method('PUT')
 
@@ -36,7 +36,9 @@
             @enderror
         </div>
 
-        <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded">Perbarui Feedback</button>
+        <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded flex items-center">
+            <i class="fas fa-save mr-2"></i> Perbarui Feedback
+        </button>
     </form>
 </div>
 @endsection

@@ -12,13 +12,19 @@ class ConsultationScheduleController extends Controller
 {
     public function index(Request $request)
     {
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(403, 'User not authenticated.');
+        }
+
         // Ambil semua appointment pasien yang sedang login
         $appointmentsQuery = Appointment::with(['doctor.user', 'patient.user'])
-            ->when(Auth::user()->role === 'pasien', function ($query) {
-                $query->where('patient_id', Auth::user()->patient->id ?? null);
+            ->when($user->role === 'pasien', function ($query) use ($user) {
+                $query->where('patient_id', $user->patient->id ?? null);
             })
-            ->when(Auth::user()->role === 'dokter', function ($query) {
-                $query->where('doctor_id', Doctor::where('user_id', Auth::id())->value('id'));
+            ->when($user->role === 'dokter', function ($query) use ($user) {
+                $query->where('doctor_id', $user->doctor->id ?? null);
             });
 
         // Fitur Pencarian
@@ -52,7 +58,7 @@ class ConsultationScheduleController extends Controller
         // Ambil data appointment setelah pencarian dan sorting
         $appointments = $appointmentsQuery->get();
 
-        $view = Auth::user()->role === 'pasien' ? 'pasien.appointments.index' : 'dokter.appointments.index';
+        $view = $user->role === 'pasien' ? 'pasien.appointments.index' : ($user->role === 'dokter' ? 'dokter.appointments.index' : 'admin.appointments.index');
 
         return view($view, compact('appointments'));
     }
@@ -63,7 +69,7 @@ class ConsultationScheduleController extends Controller
         $pasiens = Patient::with('user')->get();
         $timeSlots = $this->generateTimeSlots();
 
-        $view = Auth::user()->role === 'pasien' ? 'pasien.appointments.create' : 'dokter.appointments.create';
+        $view = Auth::user()->role === 'pasien' ? 'pasien.appointments.create' : (Auth::user()->role === 'dokter' ? 'dokter.appointments.create' : 'admin.appointments.create');
 
         return view($view, compact('dokters', 'pasiens', 'timeSlots'));
     }
@@ -76,7 +82,7 @@ class ConsultationScheduleController extends Controller
             'time' => 'required|date_format:H:i',
         ];
 
-        if (Auth::user()->role === 'dokter') {
+        if (Auth::user()->role === 'dokter' || Auth::user()->role === 'admin') {
             $rules['patient_id'] = 'required|exists:patients,id';
         }
 
@@ -96,7 +102,7 @@ class ConsultationScheduleController extends Controller
             'status' => 'scheduled',
         ]);
 
-        $route = Auth::user()->role === 'pasien' ? 'pasien.appointments.index' : 'dokter.appointments.index';
+        $route = Auth::user()->role === 'pasien' ? 'pasien.appointments.index' : (Auth::user()->role === 'dokter' ? 'dokter.appointments.index' : 'admin.appointments.index');
 
         return redirect()->route($route)->with('success', 'Janji temu berhasil dibuat.');
     }
@@ -111,7 +117,7 @@ class ConsultationScheduleController extends Controller
         $pasiens = Patient::with('user')->get();
         $timeSlots = $this->generateTimeSlots();
 
-        $view = Auth::user()->role === 'pasien' ? 'pasien.appointments.edit' : 'dokter.appointments.edit';
+        $view = Auth::user()->role === 'pasien' ? 'pasien.appointments.edit' : (Auth::user()->role === 'dokter' ? 'dokter.appointments.edit' : 'admin.appointments.edit');
 
         return view($view, compact('appointment', 'dokters', 'pasiens', 'timeSlots'));
     }
@@ -128,7 +134,7 @@ class ConsultationScheduleController extends Controller
             'time' => 'required|date_format:H:i',
         ];
 
-        if (Auth::user()->role === 'dokter') {
+        if (Auth::user()->role === 'dokter' || Auth::user()->role === 'admin') {
             $rules['patient_id'] = 'required|exists:patients,id';
         }
 
@@ -141,7 +147,7 @@ class ConsultationScheduleController extends Controller
             'time' => $request->time,
         ]);
 
-        $route = Auth::user()->role === 'pasien' ? 'pasien.appointments.index' : 'dokter.appointments.index';
+        $route = Auth::user()->role === 'pasien' ? 'pasien.appointments.index' : (Auth::user()->role === 'dokter' ? 'dokter.appointments.index' : 'admin.appointments.index');
 
         return redirect()->route($route)->with('success', 'Janji temu berhasil diperbarui.');
     }
@@ -174,7 +180,7 @@ class ConsultationScheduleController extends Controller
 
         $appointment->delete();
 
-        $route = Auth::user()->role === 'pasien' ? 'pasien.appointments.index' : 'dokter.appointments.index';
+        $route = Auth::user()->role === 'pasien' ? 'pasien.appointments.index' : (Auth::user()->role === 'dokter' ? 'dokter.appointments.index' : 'admin.appointments.index');
 
         return redirect()->route($route)->with('success', 'Janji temu berhasil dihapus.');
     }

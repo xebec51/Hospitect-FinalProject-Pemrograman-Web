@@ -55,7 +55,9 @@ class PasienController extends Controller
             });
         }
 
-        if ($request->has('sort') && $request->has('direction')) {
+        $sortableColumns = ['record_date', 'diagnosis', 'treatment']; // Add valid columns here
+
+        if ($request->has('sort') && $request->has('direction') && in_array($request->sort, $sortableColumns)) {
             $query->orderBy($request->sort, $request->direction);
         } else {
             $query->orderBy('record_date', 'desc');
@@ -116,7 +118,32 @@ class PasienController extends Controller
             ['rating' => $request->rating, 'comment' => $request->comment]
         );
 
-        return redirect()->route('pasien.schedule')->with('success', 'Umpan balik berhasil disimpan.');
+        return redirect()->route('pasien.appointments.index')->with('success', 'Umpan balik berhasil disimpan.');
+    }
+
+    /**
+     * Perbarui umpan balik pasien.
+     */
+    public function updateFeedback(Request $request, Feedback $feedback)
+    {
+        $patient = Auth::user()->patient;
+
+        // Validasi keberadaan pasien
+        abort_if(!$patient, 404, 'Pasien tidak ditemukan saat memperbarui umpan balik.');
+
+        // Validasi input feedback
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:500',
+        ]);
+
+        // Update feedback
+        $feedback->update([
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+        ]);
+
+        return redirect()->route('pasien.appointments.index')->with('success', 'Umpan balik berhasil diperbarui.');
     }
 
     /**
@@ -186,5 +213,68 @@ class PasienController extends Controller
         ]);
 
         return redirect()->route('pasien.profile')->with('success', 'Informasi medis berhasil diperbarui.');
+    }
+
+    public function storeAppointment(Request $request)
+    {
+        $patient = Auth::user()->patient;
+
+        // Validasi keberadaan pasien
+        abort_if(!$patient, 404, 'Pasien tidak ditemukan saat membuat janji temu.');
+
+        // Validasi input janji temu
+        $request->validate([
+            'doctor_id' => 'required|exists:dokters,id',
+            'date' => 'required|date|after_or_equal:today',
+            'time' => 'required|date_format:H:i',
+        ]);
+
+        // Cek apakah waktu janji temu sudah lewat
+        $appointmentDateTime = Carbon::parse($request->date . ' ' . $request->time);
+        if ($appointmentDateTime->isPast()) {
+            return redirect()->route('pasien.appointments.create')->with('error', 'Waktu janji temu tidak boleh di masa lalu.');
+        }
+
+        // Simpan janji temu
+        Appointment::create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $request->doctor_id,
+            'date' => $request->date,
+            'time' => $request->time,
+            'notes' => $request->notes,
+        ]);
+
+        return redirect()->route('pasien.appointments.index')->with('success', 'Janji temu berhasil dibuat.');
+    }
+
+    public function updateAppointment(Request $request, Appointment $appointment)
+    {
+        $patient = Auth::user()->patient;
+
+        // Validasi keberadaan pasien
+        abort_if(!$patient, 404, 'Pasien tidak ditemukan saat memperbarui janji temu.');
+
+        // Validasi input janji temu
+        $request->validate([
+            'doctor_id' => 'required|exists:dokters,id',
+            'date' => 'required|date|after_or_equal:today',
+            'time' => 'required|date_format:H:i',
+        ]);
+
+        // Cek apakah waktu janji temu sudah lewat
+        $appointmentDateTime = Carbon::parse($request->date . ' ' . $request->time);
+        if ($appointmentDateTime->isPast()) {
+            return redirect()->route('pasien.appointments.edit', $appointment->id)->with('error', 'Waktu janji temu tidak boleh di masa lalu.');
+        }
+
+        // Update janji temu
+        $appointment->update([
+            'doctor_id' => $request->doctor_id,
+            'date' => $request->date,
+            'time' => $request->time,
+            'notes' => $request->notes,
+        ]);
+
+        return redirect()->route('pasien.appointments.index')->with('success', 'Janji temu berhasil diperbarui.');
     }
 }

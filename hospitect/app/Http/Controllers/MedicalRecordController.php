@@ -25,42 +25,71 @@ class MedicalRecordController extends Controller
         }
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(403, 'User not authenticated.');
+        }
+
         // Jika pengguna adalah pasien, tampilkan hanya rekam medis mereka sendiri
-        if ($this->user->patient) {
-            $medicalRecords = MedicalRecord::where('patient_id', $this->user->patient->id)
-                ->with(['doctor', 'medicines'])
+        if ($user->patient) {
+            $medicalRecords = MedicalRecord::where('patient_id', $user->patient->id)
+                ->with(['doctor.user', 'medicines'])
                 ->orderBy('created_at', 'desc')
                 ->get();
-        } else {
+        } elseif ($user->role === 'admin') {
+            // Jika pengguna adalah admin, tampilkan semua rekam medis
+            $medicalRecords = MedicalRecord::with(['doctor.user', 'patient.user', 'medicines'])
+                ->when($request->search, function ($query, $search) {
+                    return $query->whereHas('patient.user', function ($query) use ($search) {
+                        $query->where('name', 'like', "%{$search}%");
+                    })->orWhereHas('doctor.user', function ($query) use ($search) {
+                        $query->where('name', 'like', "%{$search}%");
+                    })->orWhere('diagnosis', 'like', "%{$search}%");
+                })
+                ->when($request->sort, function ($query, $sort) use ($request) {
+                    $direction = $request->direction === 'desc' ? 'desc' : 'asc';
+                    return $query->orderBy($sort, $direction);
+                }, function ($query) {
+                    return $query->orderBy('created_at', 'desc');
+                })
+                ->paginate(10);  // Pagination untuk admin
+        } elseif ($user->doctor) {
             // Jika pengguna adalah dokter, tampilkan rekam medis berdasarkan dokter
-            $medicalRecords = MedicalRecord::where('doctor_id', $this->doctor->id)
+            $medicalRecords = MedicalRecord::where('doctor_id', $user->doctor->id)
                 ->with(['patient.user', 'medicines'])
                 ->orderBy('created_at', 'desc')
                 ->get();
+        } else {
+            abort(403, 'User role not recognized.');
         }
 
-        return view('dokter.medical_records.index', compact('medicalRecords'));
+        $view = $user->role === 'admin' ? 'admin.medical-records.index' : 'dokter.medical_records.index';
+
+        return view($view, compact('medicalRecords'));
     }
 
     public function create()
     {
-        // Pastikan hanya dokter yang bisa membuat rekam medis
-        if (!$this->doctor) {
+        // Pastikan hanya dokter dan admin yang bisa membuat rekam medis
+        if (!$this->doctor && $this->user->role !== 'admin') {
             abort(403, 'Anda tidak diizinkan membuat rekam medis.');
         }
 
         $patients = Patient::with('user')->get();
         $medicines = Medicine::all();
 
-        return view('dokter.medical_records.create', compact('patients', 'medicines'));
+        $view = $this->user->role === 'admin' ? 'admin.medical_records.create' : 'dokter.medical_records.create';
+
+        return view($view, compact('patients', 'medicines'));
     }
 
     public function store(Request $request)
     {
-        // Pastikan hanya dokter yang bisa menyimpan rekam medis
-        if (!$this->doctor) {
+        // Pastikan hanya dokter dan admin yang bisa menyimpan rekam medis
+        if (!$this->doctor && $this->user->role !== 'admin') {
             abort(403, 'Anda tidak diizinkan menyimpan rekam medis.');
         }
 
@@ -77,7 +106,7 @@ class MedicalRecordController extends Controller
 
         // Menyimpan rekam medis baru
         $medicalRecord = MedicalRecord::create([
-            'doctor_id' => $this->doctor->id,
+            'doctor_id' => $this->doctor ? $this->doctor->id : null,
             'patient_id' => $request->patient_id,
             'diagnosis' => $request->diagnosis,
             'record_date' => $request->record_date,
@@ -92,27 +121,31 @@ class MedicalRecordController extends Controller
             ]);
         }
 
-        return redirect()->route('dokter.medical-records.index')
+        $route = $this->user->role === 'admin' ? 'admin.medical-records.index' : 'dokter.medical-records.index';
+
+        return redirect()->route($route)
                          ->with('success', 'Rekam medis berhasil ditambahkan.');
     }
 
     public function edit(MedicalRecord $medicalRecord)
     {
-        // Memastikan hanya dokter yang bisa mengedit rekam medis mereka sendiri
-        if ($this->user->patient || $medicalRecord->doctor_id !== $this->doctor->id) {
+        // Memastikan hanya dokter dan admin yang bisa mengedit rekam medis
+        if ($this->user->patient || ($this->user->role !== 'admin' && $medicalRecord->doctor_id !== $this->doctor->id)) {
             abort(403, 'Anda tidak diizinkan mengedit rekam medis ini.');
         }
 
         $patients = Patient::with('user')->get();
         $medicines = Medicine::all();
 
-        return view('dokter.medical_records.edit', compact('medicalRecord', 'patients', 'medicines'));
+        $view = $this->user->role === 'admin' ? 'admin.medical_records.edit' : 'dokter.medical_records.edit';
+
+        return view($view, compact('medicalRecord', 'patients', 'medicines'));
     }
 
     public function update(Request $request, MedicalRecord $medicalRecord)
     {
-        // Memastikan hanya dokter yang bisa memperbarui rekam medis mereka sendiri
-        if ($this->user->patient || $medicalRecord->doctor_id !== $this->doctor->id) {
+        // Memastikan hanya dokter dan admin yang bisa memperbarui rekam medis
+        if ($this->user->patient || ($this->user->role !== 'admin' && $medicalRecord->doctor_id !== $this->doctor->id)) {
             abort(403, 'Anda tidak diizinkan memperbarui rekam medis ini.');
         }
 
@@ -142,14 +175,16 @@ class MedicalRecordController extends Controller
             ]);
         }
 
-        return redirect()->route('dokter.medical-records.index')
+        $route = $this->user->role === 'admin' ? 'admin.medical-records.index' : 'dokter.medical-records.index';
+
+        return redirect()->route($route)
                          ->with('success', 'Rekam medis berhasil diperbarui.');
     }
 
     public function destroy(MedicalRecord $medicalRecord)
     {
-        // Memastikan hanya dokter yang dapat menghapus rekam medis mereka sendiri
-        if ($this->user->patient || $medicalRecord->doctor_id !== $this->doctor->id) {
+        // Memastikan hanya dokter dan admin yang dapat menghapus rekam medis
+        if ($this->user->patient || ($this->user->role !== 'admin' && $medicalRecord->doctor_id !== $this->doctor->id)) {
             abort(403, 'Anda tidak diizinkan menghapus rekam medis ini.');
         }
 
@@ -158,7 +193,9 @@ class MedicalRecordController extends Controller
         // Menghapus rekam medis dari database
         $medicalRecord->delete();
 
-        return redirect()->route('dokter.medical-records.index')
+        $route = $this->user->role === 'admin' ? 'admin.medical-records.index' : 'dokter.medical-records.index';
+
+        return redirect()->route($route)
                          ->with('success', 'Rekam medis berhasil dihapus.');
     }
 }

@@ -14,7 +14,9 @@
     <!-- Pencarian -->
     <form action="{{ route('pasien.appointments.index') }}" method="GET" class="mb-4 flex">
         <input type="text" name="search" placeholder="Cari Tanggal, Waktu, atau Dokter" class="p-2 border border-gray-300 rounded-l-md" value="{{ request('search') }}">
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md">Cari</button>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md flex items-center">
+            <i class="fas fa-search mr-2"></i> Cari
+        </button>
     </form>
 
     @if (session('success'))
@@ -34,9 +36,7 @@
                         <a href="{{ route('pasien.appointments.index', ['sort_by' => 'date', 'sort_order' => request('sort_order') === 'asc' ? 'desc' : 'asc', 'search' => request('search')]) }}" class="flex items-center">
                             Tanggal
                             @if (request('sort_by') === 'date')
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                </svg>
+                                <i class="fas fa-sort{{ request('sort_order') === 'asc' ? '-up' : '-down' }} ml-2"></i>
                             @endif
                         </a>
                     </th>
@@ -45,16 +45,15 @@
                     <th class="border border-gray-200 p-2 text-left">Dokter</th>
                     <!-- Sorting Status -->
                     <th class="border border-gray-200 p-2 text-left">
-                        <a href="{{ route('pasien.appointments.index', ['sort_by' => 'status', 'sort_order' => request('sort_order') === 'asc' ? 'desc' : 'asc', 'search' => request('search')]) }}">
+                        <a href="{{ route('pasien.appointments.index', ['sort_by' => 'status', 'sort_order' => request('sort_order') === 'asc' ? 'desc' : 'asc', 'search' => request('search')]) }}" class="flex items-center">
                             Status
                             @if (request('sort_by') === 'status')
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                </svg>
+                                <i class="fas fa-sort{{ request('sort_order') === 'asc' ? '-up' : '-down' }} ml-2"></i>
                             @endif
                         </a>
                     </th>
                     <th class="border border-gray-200 p-2 text-left">Aksi</th>
+                    <th class="border border-gray-200 p-2 text-left">Feedback</th>
                 </tr>
             </thead>
             <tbody>
@@ -65,28 +64,42 @@
                         <td class="border border-gray-200 p-2">{{ $appointment->doctor->user->name }}</td>
                         <td class="border border-gray-200 p-2">{{ ucfirst($appointment->status) }}</td>
                         <td class="border border-gray-200 p-2">
+                            @if ($appointment->status != 'completed')
+                                <a href="{{ route('pasien.appointments.edit', $appointment->id) }}" class="text-blue-600 hover:underline mr-2">
+                                    <i class="fas fa-edit mr-1"></i> Edit Jadwal
+                                </a>
+                            @endif
+                            <form action="{{ route('pasien.appointments.destroy', $appointment->id) }}" method="POST" class="inline-block">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Apakah Anda yakin ingin menghapus?')">
+                                    <i class="fas fa-trash mr-1"></i> Hapus
+                                </button>
+                            </form>
+                        </td>
+                        <td class="border border-gray-200 p-2">
                             @if ($appointment->status == 'completed' && $appointment->date >= \Carbon\Carbon::now()->subDays(3))
                                 @php
                                     $feedback = $appointment->feedback;
                                 @endphp
                                 @if ($feedback)
                                     <form action="{{ route('pasien.feedback.edit', $feedback->id) }}" method="GET">
-                                        <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded">Edit Feedback</button>
+                                        <button type="submit" class="text-blue-600 hover:underline flex items-center">
+                                            <i class="fas fa-edit mr-1"></i> Edit Feedback
+                                        </button>
                                     </form>
                                 @else
                                     <form action="{{ route('pasien.feedback.create', $appointment->id) }}" method="GET">
-                                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Beri Feedback</button>
+                                        <button type="submit" class="text-blue-600 hover:underline flex items-center">
+                                            <i class="fas fa-comment-dots mr-1"></i> Beri Feedback
+                                        </button>
                                     </form>
                                 @endif
+                            @elseif ($appointment->status == 'cancelled')
+                                <p class="text-gray-500">Feedback tidak tersedia karena konsultasi dibatalkan.</p>
+                            @else
+                                <p class="text-gray-500">Feedback tersedia setelah konsultasi selesai.</p>
                             @endif
-                            @if ($appointment->status != 'completed')
-                                <a href="{{ route('pasien.appointments.edit', $appointment->id) }}" class="text-blue-600 hover:underline">Edit Jadwal</a>
-                            @endif
-                            <form action="{{ route('pasien.appointments.destroy', $appointment->id) }}" method="POST" class="inline-block">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Apakah Anda yakin ingin menghapus?')">Hapus</button>
-                            </form>
                         </td>
                     </tr>
                 @endforeach
