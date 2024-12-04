@@ -9,6 +9,14 @@
         </a>
     </div>
 
+    <!-- Pencarian -->
+    <form action="{{ route('dokter.medical-records.index') }}" method="GET" class="mb-4 flex">
+        <input type="text" name="search" placeholder="Cari Nama Pasien atau Diagnosis" class="p-2 border border-gray-300 rounded-l-md" value="{{ request('search') }}">
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md flex items-center">
+            <i class="fas fa-search mr-2"></i> Cari
+        </button>
+    </form>
+
     @if (session('success'))
         <div class="bg-green-500 text-white p-2 rounded mb-4">
             <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
@@ -19,12 +27,29 @@
         <table class="min-w-full bg-white border border-gray-200">
             <thead class="bg-gray-100">
                 <tr>
-                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-user mr-2"></i>Nama Pasien</th>
-                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-diagnoses mr-2"></i>Diagnosis</th>
-                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-calendar-alt mr-2"></i>Tanggal Periksa</th>
-                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-procedures mr-2"></i>Tindakan</th>
-                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-pills mr-2"></i>Obat</th>
-                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-cogs mr-2"></i>Aksi</th>
+                    <!-- Sorting Nama Pasien -->
+                    <th class="border border-gray-200 p-2 text-left">
+                        <a href="{{ route('dokter.medical-records.index', ['sort_by' => 'patient_name', 'sort_order' => request('sort_order') === 'asc' ? 'desc' : 'asc', 'search' => request('search')]) }}" class="flex items-center">
+                            Nama Pasien
+                            @if (request('sort_by') === 'patient_name')
+                                <i class="fas fa-sort{{ request('sort_order') === 'asc' ? '-up' : '-down' }} ml-2"></i>
+                            @endif
+                        </a>
+                    </th>
+                    <!-- Sorting Diagnosis -->
+                    <th class="border border-gray-200 p-2 text-left">Diagnosis</th>
+                    <!-- Sorting Tanggal Periksa -->
+                    <th class="border border-gray-200 p-2 text-left">
+                        <a href="{{ route('dokter.medical-records.index', ['sort_by' => 'record_date', 'sort_order' => request('sort_order') === 'asc' ? 'desc' : 'asc', 'search' => request('search')]) }}" class="flex items-center">
+                            Tanggal Periksa
+                            @if (request('sort_by') === 'record_date')
+                                <i class="fas fa-sort{{ request('sort_order') === 'asc' ? '-up' : '-down' }} ml-2"></i>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border border-gray-200 p-2 text-left">Tindakan</th>
+                    <th class="border border-gray-200 p-2 text-left">Obat</th>
+                    <th class="border border-gray-200 p-2 text-left">Aksi</th>
                 </tr>
             </thead>
             <tbody>

@@ -16,13 +16,17 @@ class MedicalRecordController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth');  // Pastikan pengguna sudah login
-        $this->user = Auth::user(); // Ambil data pengguna yang sedang login
+        $this->middleware('auth');  // Ensure the user is authenticated
+        $this->middleware(function ($request, $next) {
+            $this->user = Auth::user(); // Get the authenticated user
 
-        // Pastikan user adalah dokter dan memiliki relasi dokter
-        if ($this->user && $this->user->doctor) {
-            $this->doctor = $this->user->doctor;  // Ambil data dokter jika pengguna adalah dokter
-        }
+            // Ensure the user is a doctor and has a doctor relationship
+            if ($this->user && $this->user->doctor) {
+                $this->doctor = $this->user->doctor;  // Get the doctor data if the user is a doctor
+            }
+
+            return $next($request);
+        });
     }
 
     public function index(Request $request)
@@ -73,8 +77,8 @@ class MedicalRecordController extends Controller
 
     public function create()
     {
-        // Pastikan hanya dokter dan admin yang bisa membuat rekam medis
-        if (!$this->doctor && $this->user->role !== 'admin') {
+        // Ensure only doctors and admins can create medical records
+        if (!$this->user || (!$this->doctor && $this->user->role !== 'admin')) {
             abort(403, 'Anda tidak diizinkan membuat rekam medis.');
         }
 

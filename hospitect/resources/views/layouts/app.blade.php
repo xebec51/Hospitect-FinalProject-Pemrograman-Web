@@ -391,6 +391,31 @@
                 header.style.width = 'calc(100% - 240px)';
                 mainContent.style.paddingLeft = '240px';
             }
+
+            // Check if "remember me" is checked and set the email value
+            const rememberMeCheckbox = document.getElementById('remember_me');
+            const emailInput = document.getElementById('email');
+            if (rememberMeCheckbox && emailInput) {
+                const rememberedEmail = localStorage.getItem('rememberedEmail');
+                if (rememberedEmail) {
+                    emailInput.value = rememberedEmail;
+                    rememberMeCheckbox.checked = true;
+                }
+
+                rememberMeCheckbox.addEventListener('change', () => {
+                    if (rememberMeCheckbox.checked) {
+                        localStorage.setItem('rememberedEmail', emailInput.value);
+                    } else {
+                        localStorage.removeItem('rememberedEmail');
+                    }
+                });
+
+                emailInput.addEventListener('input', () => {
+                    if (rememberMeCheckbox.checked) {
+                        localStorage.setItem('rememberedEmail', emailInput.value);
+                    }
+                });
+            }
         });
     </script>
 </body>

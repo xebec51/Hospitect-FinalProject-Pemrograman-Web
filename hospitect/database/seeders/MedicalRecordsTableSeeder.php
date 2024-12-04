@@ -4,51 +4,83 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\MedicalRecord;
-use App\Models\Appointment;
-use App\Models\Medicine;
+use App\Models\Doctor;
+use App\Models\Patient;
 use Carbon\Carbon;
 
 class MedicalRecordsTableSeeder extends Seeder
 {
-    /**
-     * Jalankan seeder untuk tabel medical_records.
-     *
-     * @return void
-     */
     public function run()
     {
-        $appointments = Appointment::where('status', 'completed')->get();
-        $medicines = Medicine::all();
+        $doctorIds = Doctor::pluck('id')->toArray();
+        $patientIds = Patient::pluck('id')->toArray();
 
-        if ($appointments->isEmpty()) {
-            $this->command->warn('Tidak ada janji konsultasi dengan status "completed" untuk membuat catatan medis.');
+        if (count($doctorIds) < 4 || count($patientIds) < 8) {
+            $this->command->error('Tidak cukup data dokter atau pasien di tabel terkait.');
             return;
         }
 
-        if ($medicines->isEmpty()) {
-            $this->command->warn('Tidak ada data obat untuk ditambahkan ke catatan medis.');
-            return;
-        }
+        $records = [
+            [
+                'patient_id' => $patientIds[0],
+                'doctor_id' => $doctorIds[0],
+                'diagnosis' => 'Diabetes melitus tipe 2',
+                'treatment' => 'Metformin 500mg, diet rendah gula',
+                'record_date' => Carbon::now()->subDays(10)->setTime(10, 0, 0),
+            ],
+            [
+                'patient_id' => $patientIds[1],
+                'doctor_id' => $doctorIds[1],
+                'diagnosis' => 'Asma bronkial',
+                'treatment' => 'Salbutamol inhaler, hindari alergen',
+                'record_date' => Carbon::now()->subDays(20)->setTime(11, 0, 0),
+            ],
+            [
+                'patient_id' => $patientIds[2],
+                'doctor_id' => $doctorIds[2],
+                'diagnosis' => 'Hipertensi esensial',
+                'treatment' => 'Amlodipin 5mg, diet rendah garam',
+                'record_date' => Carbon::now()->subDays(15)->setTime(9, 0, 0),
+            ],
+            [
+                'patient_id' => $patientIds[3],
+                'doctor_id' => $doctorIds[3],
+                'diagnosis' => 'Migrain kronis',
+                'treatment' => 'Sumatriptan 50mg, hindari pemicu',
+                'record_date' => Carbon::now()->subDays(5)->setTime(14, 0, 0),
+            ],
+            [
+                'patient_id' => $patientIds[4],
+                'doctor_id' => $doctorIds[0],
+                'diagnosis' => 'Gastritis kronis',
+                'treatment' => 'Omeprazole 20mg, hindari makanan pedas',
+                'record_date' => Carbon::now()->subDays(12)->setTime(10, 30, 0),
+            ],
+            [
+                'patient_id' => $patientIds[5],
+                'doctor_id' => $doctorIds[1],
+                'diagnosis' => 'Anemia defisiensi besi',
+                'treatment' => 'Suplemen zat besi, diet tinggi zat besi',
+                'record_date' => Carbon::now()->subDays(18)->setTime(11, 30, 0),
+            ],
+            [
+                'patient_id' => $patientIds[6],
+                'doctor_id' => $doctorIds[2],
+                'diagnosis' => 'Osteoartritis',
+                'treatment' => 'Paracetamol 500mg, fisioterapi',
+                'record_date' => Carbon::now()->subDays(22)->setTime(9, 30, 0),
+            ],
+            [
+                'patient_id' => $patientIds[7],
+                'doctor_id' => $doctorIds[3],
+                'diagnosis' => 'Depresi mayor',
+                'treatment' => 'Sertraline 50mg, konseling psikologis',
+                'record_date' => Carbon::now()->subDays(7)->setTime(14, 30, 0),
+            ],
+        ];
 
-        foreach ($appointments as $appointment) {
-            // Buat catatan medis berdasarkan janji konsultasi
-            $record = MedicalRecord::create([
-                'patient_id' => $appointment->patient_id,
-                'doctor_id' => $appointment->doctor_id,
-                'diagnosis' => 'Diagnosa untuk pasien ' . $appointment->patient_id,
-                'treatment' => 'Pengobatan untuk pasien ' . $appointment->patient_id,
-                // Gunakan waktu dengan 'now' dan tambahkan waktu acak untuk catatan medis
-                'record_date' => Carbon::now()->subDays(rand(1, 30))->setTime(rand(7, 17), rand(0, 59), 0),
-            ]);
-
-            // Tambahkan obat ke catatan medis (maks 3 obat per catatan)
-            $assignedMedicines = $medicines->random(rand(1, min(3, $medicines->count())));
-            foreach ($assignedMedicines as $medicine) {
-                $record->medicines()->attach($medicine->id, [
-                    'dosage' => rand(1, 3) . ' kali sehari',
-                    'instructions' => 'Minum setelah makan.',
-                ]);
-            }
+        foreach ($records as $record) {
+            MedicalRecord::create($record);
         }
 
         $this->command->info('Seeder untuk catatan medis berhasil dijalankan.');

@@ -4,76 +4,127 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Appointment;
-use App\Models\Patient;
 use App\Models\Doctor;
+use App\Models\Patient;
 use Carbon\Carbon;
 
 class AppointmentsTableSeeder extends Seeder
 {
-    /**
-     * Jalankan seeder untuk tabel appointments.
-     *
-     * @return void
-     */
     public function run()
     {
-        $patients = Patient::all();
-        $doctors = Doctor::all();
+        $doctorIds = Doctor::pluck('id')->toArray();
+        $patientIds = Patient::pluck('id')->toArray();
 
-        if ($doctors->isEmpty()) {
-            $this->command->error('Tidak ada dokter untuk membuat janji konsultasi.');
+        if (count($doctorIds) < 6 || count($patientIds) < 10) {
+            $this->command->error('Tidak cukup data dokter atau pasien di tabel terkait.');
             return;
         }
 
-        if ($patients->isEmpty()) {
-            $this->command->error('Tidak ada pasien untuk membuat janji konsultasi.');
-            return;
-        }
+        $appointments = [
+            [
+                'patient_id' => $patientIds[0],
+                'doctor_id' => $doctorIds[0],
+                'date' => Carbon::now()->subDays(10)->format('Y-m-d'),
+                'time' => '10:00:00',
+                'status' => 'completed',
+            ],
+            [
+                'patient_id' => $patientIds[1],
+                'doctor_id' => $doctorIds[1],
+                'date' => Carbon::now()->subDays(20)->format('Y-m-d'),
+                'time' => '11:00:00',
+                'status' => 'completed',
+            ],
+            [
+                'patient_id' => $patientIds[2],
+                'doctor_id' => $doctorIds[2],
+                'date' => Carbon::now()->subDays(15)->format('Y-m-d'),
+                'time' => '09:00:00',
+                'status' => 'completed',
+            ],
+            [
+                'patient_id' => $patientIds[3],
+                'doctor_id' => $doctorIds[3],
+                'date' => Carbon::now()->subDays(5)->format('Y-m-d'),
+                'time' => '14:00:00',
+                'status' => 'completed',
+            ],
+            [
+                'patient_id' => $patientIds[0],
+                'doctor_id' => $doctorIds[0],
+                'date' => Carbon::now()->addDays(5)->format('Y-m-d'),
+                'time' => '10:00:00',
+                'status' => 'scheduled',
+            ],
+            [
+                'patient_id' => $patientIds[1],
+                'doctor_id' => $doctorIds[1],
+                'date' => Carbon::now()->addDays(10)->format('Y-m-d'),
+                'time' => '11:00:00',
+                'status' => 'scheduled',
+            ],
+            [
+                'patient_id' => $patientIds[4],
+                'doctor_id' => $doctorIds[0],
+                'date' => Carbon::now()->subDays(12)->format('Y-m-d'),
+                'time' => '10:30:00',
+                'status' => 'completed',
+            ],
+            [
+                'patient_id' => $patientIds[5],
+                'doctor_id' => $doctorIds[1],
+                'date' => Carbon::now()->subDays(18)->format('Y-m-d'),
+                'time' => '11:30:00',
+                'status' => 'completed',
+            ],
+            [
+                'patient_id' => $patientIds[6],
+                'doctor_id' => $doctorIds[2],
+                'date' => Carbon::now()->subDays(22)->format('Y-m-d'),
+                'time' => '09:30:00',
+                'status' => 'completed',
+            ],
+            [
+                'patient_id' => $patientIds[7],
+                'doctor_id' => $doctorIds[3],
+                'date' => Carbon::now()->subDays(7)->format('Y-m-d'),
+                'time' => '14:30:00',
+                'status' => 'completed',
+            ],
+            [
+                'patient_id' => $patientIds[4],
+                'doctor_id' => $doctorIds[0],
+                'date' => Carbon::now()->addDays(7)->format('Y-m-d'),
+                'time' => '10:30:00',
+                'status' => 'scheduled',
+            ],
+            [
+                'patient_id' => $patientIds[5],
+                'doctor_id' => $doctorIds[1],
+                'date' => Carbon::now()->addDays(14)->format('Y-m-d'),
+                'time' => '11:30:00',
+                'status' => 'scheduled',
+            ],
+            [
+                'patient_id' => $patientIds[8],
+                'doctor_id' => $doctorIds[4],
+                'date' => Carbon::now()->subDays(12)->format('Y-m-d'),
+                'time' => '10:30:00',
+                'status' => 'completed',
+            ],
+            [
+                'patient_id' => $patientIds[9],
+                'doctor_id' => $doctorIds[5],
+                'date' => Carbon::now()->subDays(18)->format('Y-m-d'),
+                'time' => '11:30:00',
+                'status' => 'completed',
+            ],
+        ];
 
-        $workHoursStart = 7; // Jam mulai kerja
-        $workHoursEnd = 17;  // Jam selesai kerja
-        $timeSlots = $this->generateTimeSlots($workHoursStart, $workHoursEnd, 15); // Slot waktu 15 menit
-
-        foreach ($patients as $patient) {
-            // Tentukan jumlah dokter yang akan digunakan (maksimal 3 atau semua jika kurang)
-            $assignedDoctors = $doctors->count() > 3 ? $doctors->random(3) : $doctors;
-
-            foreach ($assignedDoctors as $doctor) {
-                $randomDate = Carbon::now()->addDays(rand(1, 30))->format('Y-m-d'); // Random tanggal konsultasi
-                $randomTimeSlot = $timeSlots[array_rand($timeSlots)]; // Random slot waktu
-
-                Appointment::create([
-                    'patient_id' => $patient->id,
-                    'doctor_id' => $doctor->id,
-                    'date' => $randomDate,
-                    'time' => $randomTimeSlot,
-                    'status' => ['scheduled', 'completed', 'cancelled'][rand(0, 2)], // Pilihan status secara acak
-                ]);
-            }
+        foreach ($appointments as $appointment) {
+            Appointment::create($appointment);
         }
 
         $this->command->info('Seeder untuk janji konsultasi berhasil dijalankan.');
-    }
-
-    /**
-     * Generate time slots.
-     *
-     * @param int $startHour
-     * @param int $endHour
-     * @param int $interval
-     * @return array
-     */
-    private function generateTimeSlots(int $startHour, int $endHour, int $interval): array
-    {
-        $slots = [];
-        $currentTime = Carbon::createFromTime($startHour, 0);
-        $endTime = Carbon::createFromTime($endHour, 0);
-
-        while ($currentTime < $endTime) {
-            $slots[] = $currentTime->format('H:i:s');
-            $currentTime->addMinutes($interval);
-        }
-
-        return $slots;
     }
 }

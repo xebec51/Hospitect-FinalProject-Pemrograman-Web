@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Feedback;
+use App\Models\Appointment; // Add this line
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -22,6 +23,10 @@ class FeedbackController extends Controller
         // Jika feedback tidak ditemukan, arahkan kembali dengan pesan error
         if (!$feedback) {
             return redirect()->route('pasien.records.index')->with('error', 'Feedback tidak ditemukan.');
+        }
+
+        if ($feedback->appointment->status != 'completed') {
+            return redirect()->route('pasien.records.index')->with('error', 'Feedback hanya dapat diedit jika janji temu sudah selesai.');
         }
 
         return view('pasien.feedback.edit', compact('feedback'));
@@ -54,8 +59,8 @@ class FeedbackController extends Controller
             'comment' => $request->comment,
         ]);
 
-        // Redirect kembali ke halaman medical records dengan pesan sukses
-        return redirect()->route('pasien.records.index')->with('success', 'Feedback berhasil diperbarui.');
+        // Redirect kembali ke halaman jadwal konsultasi dengan pesan sukses
+        return redirect()->route('pasien.appointments.index')->with('success', 'Feedback berhasil diperbarui.');
     }
 
     /**
@@ -85,5 +90,43 @@ class FeedbackController extends Controller
         });
 
         return view('dokter.feedbacks.index', compact('feedbacks'));
+    }
+
+    public function create($appointmentId)
+    {
+        $appointment = Appointment::findOrFail($appointmentId);
+
+        if ($appointment->status != 'completed') {
+            return redirect()->route('pasien.records.index')->with('error', 'Feedback hanya dapat diberikan jika janji temu sudah selesai.');
+        }
+
+        return view('pasien.feedback.create', compact('appointment'));
+    }
+
+    public function store(Request $request)
+    {
+        // Validasi input dari formulir
+        $request->validate([
+            'appointment_id' => 'required|exists:appointments,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:500',
+        ]);
+
+        // Pastikan janji temu sudah selesai
+        $appointment = Appointment::findOrFail($request->appointment_id);
+        if ($appointment->status != 'completed') {
+            return redirect()->route('pasien.records.index')->with('error', 'Feedback hanya dapat diberikan jika janji temu sudah selesai.');
+        }
+
+        // Buat feedback baru
+        Feedback::create([
+            'appointment_id' => $request->appointment_id,
+            'patient_id' => Auth::user()->patient->id,
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+        ]);
+
+        // Redirect kembali ke halaman jadwal konsultasi dengan pesan sukses
+        return redirect()->route('pasien.appointments.index')->with('success', 'Feedback berhasil diberikan.');
     }
 }

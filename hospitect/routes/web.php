@@ -65,6 +65,7 @@ Route::middleware(['auth', 'role:pasien'])->prefix('pasien')->name('pasien.')->g
     Route::post('/feedback/store', [FeedbackController::class, 'store'])->name('feedback.store');
     Route::get('/feedback/edit/{feedback}', [FeedbackController::class, 'edit'])->name('feedback.edit');
     Route::put('/feedback/update/{feedback}', [FeedbackController::class, 'update'])->name('feedback.update');
+    Route::get('/feedback/create/{appointment}', [FeedbackController::class, 'create'])->name('feedback.create');
 });
 
 // Logout

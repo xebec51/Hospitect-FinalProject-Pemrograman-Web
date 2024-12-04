@@ -67,18 +67,11 @@
                     @enderror
                 </div>
 
-                <div class="mb-4">
+                <div class="mb-4 flex items-center justify-between">
                     <label for="remember_me" class="inline-flex items-center">
                         <input id="remember_me" type="checkbox" name="remember" class="mr-2">
                         <span class="text-sm text-gray-600">Remember me</span>
                     </label>
-                </div>
-
-                <div class="flex items-center justify-between">
-                    @if (Route::has('password.request'))
-                        <a class="text-sm text-blue-600 hover:underline" href="{{ route('password.request') }}">Forgot your password?</a>
-                    @endif
-
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Log in</button>
                 </div>
             </form>

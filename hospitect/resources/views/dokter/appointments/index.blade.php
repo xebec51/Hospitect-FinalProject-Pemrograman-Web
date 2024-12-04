@@ -11,6 +11,14 @@
         </a>
     </div>
 
+    <!-- Pencarian -->
+    <form action="{{ route('dokter.appointments.index') }}" method="GET" class="mb-4 flex">
+        <input type="text" name="search" placeholder="Cari Tanggal, Waktu, atau Pasien" class="p-2 border border-gray-300 rounded-l-md" value="{{ request('search') }}">
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md flex items-center">
+            <i class="fas fa-search mr-2"></i> Cari
+        </button>
+    </form>
+
     @if (session('success'))
         <div class="bg-green-500 text-white p-2 rounded mb-4">
             <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
@@ -23,17 +31,34 @@
         <table class="min-w-full bg-white border border-gray-200">
             <thead class="bg-gray-100">
                 <tr>
-                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-calendar-day mr-2"></i>Tanggal</th>
-                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-clock mr-2"></i>Waktu</th>
-                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-user mr-2"></i>Pasien</th>
-                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-info-circle mr-2"></i>Status</th>
-                    <th class="border border-gray-200 p-2 text-left"><i class="fas fa-cogs mr-2"></i>Aksi</th>
+                    <!-- Sorting Tanggal -->
+                    <th class="border border-gray-200 p-2 text-left">
+                        <a href="{{ route('dokter.appointments.index', ['sort_by' => 'date', 'sort_order' => request('sort_order') === 'asc' ? 'desc' : 'asc', 'search' => request('search')]) }}" class="flex items-center">
+                            Tanggal
+                            @if (request('sort_by') === 'date')
+                                <i class="fas fa-sort{{ request('sort_order') === 'asc' ? '-up' : '-down' }} ml-2"></i>
+                            @endif
+                        </a>
+                    </th>
+                    <!-- Sorting Waktu -->
+                    <th class="border border-gray-200 p-2 text-left">Waktu</th>
+                    <th class="border border-gray-200 p-2 text-left">Pasien</th>
+                    <!-- Sorting Status -->
+                    <th class="border border-gray-200 p-2 text-left">
+                        <a href="{{ route('dokter.appointments.index', ['sort_by' => 'status', 'sort_order' => request('sort_order') === 'asc' ? 'desc' : 'asc', 'search' => request('search')]) }}" class="flex items-center">
+                            Status
+                            @if (request('sort_by') === 'status')
+                                <i class="fas fa-sort{{ request('sort_order') === 'asc' ? '-up' : '-down' }} ml-2"></i>
+                            @endif
+                        </a>
+                    </th>
+                    <th class="border border-gray-200 p-2 text-left">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($appointments as $appointment)
                     <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 p-2">{{ $appointment->date }}</td>
+                        <td class="border border-gray-200 p-2">{{ \Carbon\Carbon::parse($appointment->date)->format('d-m-Y') }}</td>
                         <td class="border border-gray-200 p-2">{{ $appointment->time }}</td>
                         <td class="border border-gray-200 p-2">{{ $appointment->patient->user->name }}</td>
                         <td class="border border-gray-200 p-2">

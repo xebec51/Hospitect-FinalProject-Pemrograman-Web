@@ -64,7 +64,67 @@ class UsersTableSeeder extends Seeder
                 'email' => 'emily@hospitect.com',
                 'password' => Hash::make('password123'),
                 'role' => 'pasien',
-            ]
+            ],
+            [
+                'name' => 'John Doe',
+                'email' => 'john@hospitect.com',
+                'password' => Hash::make('password123'),
+                'role' => 'pasien',
+            ],
+            [
+                'name' => 'Jane Smith',
+                'email' => 'jane@hospitect.com',
+                'password' => Hash::make('password123'),
+                'role' => 'pasien',
+            ],
+            [
+                'name' => 'Dr. Michael Johnson',
+                'email' => 'dr.michael@hospitect.com',
+                'password' => Hash::make('password123'),
+                'role' => 'dokter',
+            ],
+            [
+                'name' => 'Dr. Emily Davis',
+                'email' => 'dr.emily@hospitect.com',
+                'password' => Hash::make('password123'),
+                'role' => 'dokter',
+            ],
+            [
+                'name' => 'Dr. Sarah Connor',
+                'email' => 'dr.sarah@hospitect.com',
+                'password' => Hash::make('password123'),
+                'role' => 'dokter',
+            ],
+            [
+                'name' => 'Dr. Alan Grant',
+                'email' => 'dr.alan@hospitect.com',
+                'password' => Hash::make('password123'),
+                'role' => 'dokter',
+            ],
+            [
+                'name' => 'Paul Atreides',
+                'email' => 'paul@hospitect.com',
+                'password' => Hash::make('password123'),
+                'role' => 'pasien',
+            ],
+            [
+                'name' => 'Jessica Atreides',
+                'email' => 'jessica@hospitect.com',
+                'password' => Hash::make('password123'),
+                'role' => 'pasien',
+            ],
+            [
+                'name' => 'Duncan Idaho',
+                'email' => 'duncan@hospitect.com',
+                'password' => Hash::make('password123'),
+                'role' => 'pasien',
+            ],
+            [
+                'name' => 'Gurney Halleck',
+                'email' => 'gurney@hospitect.com',
+                'password' => Hash::make('password123'),
+                'role' => 'pasien',
+            ],
         ];
 
         foreach ($users as $user) {

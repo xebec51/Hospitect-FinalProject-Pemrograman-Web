@@ -35,7 +35,7 @@ class MedicineController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'type' => 'required|string',
-            'stock' => 'required|integer',
+            'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -62,7 +62,7 @@ class MedicineController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'type' => 'required|string',
-            'stock' => 'required|integer',
+            'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 

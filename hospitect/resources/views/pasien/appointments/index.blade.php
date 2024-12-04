@@ -78,11 +78,19 @@
                             </form>
                         </td>
                         <td class="border border-gray-200 p-2">
-                            @if ($appointment->status == 'completed' && $appointment->date >= \Carbon\Carbon::now()->subDays(3))
+                            @if ($appointment->status == 'completed')
                                 @php
                                     $feedback = $appointment->feedback;
                                 @endphp
                                 @if ($feedback)
+                                    <div class="mb-2">
+                                        <strong>Rating:</strong>
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <i class="fas fa-star{{ $i <= $feedback->rating ? ' text-yellow-500' : ' text-gray-300' }}"></i>
+                                        @endfor
+                                        <br>
+                                        <strong>Komentar:</strong> {{ Str::limit($feedback->comment, 50) }}
+                                    </div>
                                     <form action="{{ route('pasien.feedback.edit', $feedback->id) }}" method="GET">
                                         <button type="submit" class="text-blue-600 hover:underline flex items-center">
                                             <i class="fas fa-edit mr-1"></i> Edit Feedback
@@ -96,9 +104,9 @@
                                     </form>
                                 @endif
                             @elseif ($appointment->status == 'cancelled')
-                                <p class="text-gray-500">Feedback tidak tersedia karena konsultasi dibatalkan.</p>
+                                <p class="text-gray-500"><i class="fas fa-ban mr-1"></i> Feedback tidak tersedia karena konsultasi dibatalkan.</p>
                             @else
-                                <p class="text-gray-500">Feedback tersedia setelah konsultasi selesai.</p>
+                                <p class="text-gray-500"><i class="fas fa-clock mr-1"></i> Feedback tersedia setelah konsultasi selesai.</p>
                             @endif
                         </td>
                     </tr>

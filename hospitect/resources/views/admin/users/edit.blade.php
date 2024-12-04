@@ -43,6 +43,17 @@
             </select>
         </div>
 
+        <div id="dokterFields" class="mb-4 hidden">
+            <label for="license_number" class="block text-sm font-medium text-gray-700"><i class="fas fa-id-card"></i> Nomor Lisensi</label>
+            <input id="license_number" name="license_number" type="text" value="{{ old('license_number', $user->doctor->license_number ?? '') }}" class="mt-1 block w-full border-gray-300 rounded shadow-sm">
+            <label for="specialization" class="block text-sm font-medium text-gray-700"><i class="fas fa-stethoscope"></i> Spesialisasi</label>
+            <input id="specialization" name="specialization" type="text" value="{{ old('specialization', $user->doctor->specialization ?? '') }}" class="mt-1 block w-full border-gray-300 rounded shadow-sm">
+        </div>
+        <div id="pasienFields" class="mb-4 hidden">
+            <label for="insurance_number" class="block text-sm font-medium text-gray-700"><i class="fas fa-file-medical"></i> Nomor Asuransi</label>
+            <input id="insurance_number" name="insurance_number" type="text" value="{{ old('insurance_number', $user->patient->insurance_number ?? '') }}" class="mt-1 block w-full border-gray-300 rounded shadow-sm">
+        </div>
+
         <!-- Password -->
         <div class="mb-4">
             <label for="password" class="block text-sm font-medium text-gray-700">Password (Opsional)</label>
@@ -62,4 +73,23 @@
         </div>
     </form>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleRoleFields(document.getElementById('role').value);
+    });
+
+    document.getElementById('role').addEventListener('change', function () {
+        toggleRoleFields(this.value);
+    });
+
+    function toggleRoleFields(role) {
+        document.getElementById('dokterFields').classList.add('hidden');
+        document.getElementById('pasienFields').classList.add('hidden');
+        if (role === 'dokter') {
+            document.getElementById('dokterFields').classList.remove('hidden');
+        } else if (role === 'pasien') {
+            document.getElementById('pasienFields').classList.remove('hidden');
+        }
+    }
+</script>
 @endsection
